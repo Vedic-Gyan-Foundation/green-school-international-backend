@@ -1,12 +1,24 @@
 const express = require('express');
 const path = require('path');
+const ejs = require('ejs')
+
+const routes = require('./routes/route')
+const pageRoutes = require('./routes/pages')
 
 const app = express();
 const port = 3000;
 
+app.use(express.urlencoded({extended: true}))
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+app.set('views', __dirname + '/view')
+app.set('view engine', ejs)
+// app.use(cookieParser());
 
-app.get('/api', (req, res) => {
+app.use('/api', routes)
+app.use('/', pageRoutes)
+
+app.get('/apiv1', (req, res) => {
   res.json({
     message: 'Hello from the API!'
   });
