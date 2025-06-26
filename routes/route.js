@@ -19,6 +19,8 @@ const storage = multer.diskStorage({
     }
   })
 
+  // File added
+
 const upload = multer({ storage });
 
 router.post('/upload', upload.array('photos', 12), function (req, res, next) {
