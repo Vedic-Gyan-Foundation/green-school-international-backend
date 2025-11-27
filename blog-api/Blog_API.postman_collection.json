@@ -1,0 +1,176 @@
+{
+  "info": {
+    "name": "Blog API",
+    "description": "Complete Blog API with CRUD operations",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseURL",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "health"]
+        }
+      }
+    },
+    {
+      "name": "Create Blog",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "title",
+              "value": "My First Blog Post",
+              "type": "text"
+            },
+            {
+              "key": "author",
+              "value": "John Doe",
+              "type": "text"
+            },
+            {
+              "key": "read_time",
+              "value": "5 min read",
+              "type": "text"
+            },
+            {
+              "key": "content",
+              "value": "<h2>Introduction</h2><p>This is my first blog post content.</p>",
+              "type": "text"
+            },
+            {
+              "key": "cover_image",
+              "type": "file",
+              "src": []
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseURL}}/blogs",
+          "host": ["{{baseURL}}"],
+          "path": ["blogs"]
+        }
+      }
+    },
+    {
+      "name": "Get All Blogs",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/blogs?page=1&limit=10",
+          "host": ["{{baseURL}}"],
+          "path": ["blogs"],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "10"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Blog by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/blogs/1",
+          "host": ["{{baseURL}}"],
+          "path": ["blogs", "1"]
+        }
+      }
+    },
+    {
+      "name": "Update Blog",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "title",
+              "value": "Updated Blog Title",
+              "type": "text"
+            },
+            {
+              "key": "content",
+              "value": "<h2>Updated Content</h2><p>This is updated content.</p>",
+              "type": "text"
+            },
+            {
+              "key": "cover_image",
+              "type": "file",
+              "src": []
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseURL}}/blogs/1",
+          "host": ["{{baseURL}}"],
+          "path": ["blogs", "1"]
+        }
+      }
+    },
+    {
+      "name": "Delete Blog",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/blogs/1",
+          "host": ["{{baseURL}}"],
+          "path": ["blogs", "1"]
+        }
+      }
+    },
+    {
+      "name": "Search Blogs",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/blogs/search?q=javascript&page=1&limit=10",
+          "host": ["{{baseURL}}"],
+          "path": ["blogs", "search"],
+          "query": [
+            {
+              "key": "q",
+              "value": "javascript"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "10"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

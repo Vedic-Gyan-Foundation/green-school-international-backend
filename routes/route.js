@@ -5,10 +5,6 @@ const path = require('path')
 const fs = require('fs');
 const {
   glob,
-  globSync,
-  globStream,
-  globStreamSync,
-  Glob,
 } = require('glob')
 
 const storage = multer.diskStorage({
@@ -51,7 +47,7 @@ router.get('/get-images', async (req, res) => {
       const aTime = aStats.birthtimeMs || aStats.mtimeMs;
       const bTime = bStats.birthtimeMs || bStats.mtimeMs;
 
-      return bTime - aTime; 
+      return bTime - aTime;
     });
 
     const imgPath = imgs.map((img) =>

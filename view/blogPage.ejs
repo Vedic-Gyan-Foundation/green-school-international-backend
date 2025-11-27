@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog Upload</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <div class="upload-section">
+      <h3>Upload Cover Image</h3>
+
+      <input type="file" id="fileInput" />
+
+      <button id="uploadBtn">Upload File</button>
+
+      <div id="result" style="margin-top: 15px; display: none">
+        <p>File uploaded!</p>
+        <input id="fileUrl" type="text" readonly />
+        <button id="copyBtn">Copy URL</button>
+      </div>
+    </div>
+
+    <div class="container">
+      <h1>Upload Blog Post</h1>
+
+      <form id="blogForm">
+        <label>Title</label>
+        <input type="text" id="title" placeholder="Enter title" required />
+
+        <label>Author</label>
+        <input type="text" id="author" placeholder="Enter author" required />
+
+        <label>Read Time</label>
+        <input
+          type="text"
+          id="read_time"
+          placeholder="e.g. 5 min read"
+          required
+        />
+
+        <label>Cover Image (URL String)</label>
+        <input
+          type="text"
+          id="cover_image"
+          placeholder="/blogs/image.jpg"
+          required
+        />
+
+        <label>Content</label>
+        <textarea id="content"></textarea>
+
+        <button type="submit">Upload Blog</button>
+      </form>
+
+      <pre id="output"></pre>
+    </div>
+
+    <script src="/tinymce/js/tinymce/tinymce.min.js"></script>
+    <script src="/js/script.js"></script>
+  </body>
+</html>
