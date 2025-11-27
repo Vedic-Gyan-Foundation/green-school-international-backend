@@ -19,6 +19,7 @@ const promisePool = pool.promise();
 // Test connection
 const testConnection = async () => {
   try {
+    console.log(process.env.DB_PASSWORD)
     const connection = await promisePool.getConnection();
     console.log('✅ Database connected successfully');
     connection.release();
