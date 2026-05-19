@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 const routes = require('./routes/route')
 const pageRoutes = require('./routes/pages')
 const blogRoutes = require('./routes/blogRoutes');
+const emailRoutes = require('./routes/emailRoutes');
 const { testConnection } = require('./config/database');
 
 const app = express();
@@ -21,6 +22,7 @@ app.set('view engine', ejs)
 // app.use(cookieParser());
 
 app.use('/api', routes)
+app.use('/api', emailRoutes)
 app.use('/', pageRoutes)
 app.use('/v1', blogRoutes)
 
