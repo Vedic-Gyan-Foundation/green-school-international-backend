@@ -41,6 +41,26 @@ const initDatabase = async () => {
     await connection.query(createBlogsTable);
     console.log('✅ Table "blogs" created/verified');
 
+    // Create admissions table
+    const createAdmissionsTable = `
+      CREATE TABLE IF NOT EXISTS admissions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        child_name VARCHAR(255) NOT NULL,
+        father_name VARCHAR(255) NOT NULL,
+        whatsapp_number VARCHAR(15) NOT NULL,
+        class VARCHAR(50) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        address TEXT NOT NULL,
+        query TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_email (email),
+        INDEX idx_created_at (created_at)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `;
+
+    await connection.query(createAdmissionsTable);
+    console.log('✅ Table "admissions" created/verified');
+
     // Insert sample data
     const checkData = await connection.query('SELECT COUNT(*) as count FROM blogs');
     const count = checkData[0][0].count;

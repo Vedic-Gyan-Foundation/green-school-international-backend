@@ -16,3 +16,17 @@ CREATE TABLE IF NOT EXISTS blogs (
   INDEX idx_author (author),
   INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS admissions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  child_name VARCHAR(255) NOT NULL,
+  father_name VARCHAR(255) NOT NULL,
+  whatsapp_number VARCHAR(15) NOT NULL,
+  class VARCHAR(50) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  address TEXT NOT NULL,
+  query TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_email (email),
+  INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 const routes = require('./routes/route')
 const pageRoutes = require('./routes/pages')
 const blogRoutes = require('./routes/blogRoutes');
+const admissionRoutes = require('./routes/admissionRoutes');
 const { testConnection } = require('./config/database');
 
 const app = express();
@@ -23,6 +24,7 @@ app.set('view engine', ejs)
 app.use('/api', routes)
 app.use('/', pageRoutes)
 app.use('/v1', blogRoutes)
+app.use('/v1', admissionRoutes)
 
 app.get('/apiv1', (req, res) => {
   res.json({

@@ -1,4 +1,5 @@
 const mysql = require('mysql2');
+const initDatabase = require('./initDb');
 require('dotenv').config();
 
 // Create connection pool
@@ -22,6 +23,7 @@ const testConnection = async () => {
     console.log(process.env.DB_PASSWORD)
     const connection = await promisePool.getConnection();
     console.log('✅ Database connected successfully');
+    initDatabase(); // Initialize database and tables
     connection.release();
   } catch (error) {
     console.error('❌ Database connection failed:', error.message);
