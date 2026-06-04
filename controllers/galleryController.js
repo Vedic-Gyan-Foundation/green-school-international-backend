@@ -6,7 +6,7 @@ class GalleryController {
   // Create a new gallery item
   static async createGallery(req, res) {
     try {
-      const { caption, image } = req.body;
+      const { caption, sub_caption, image } = req.body;
 
       // Validation
       if (!image) {
@@ -18,7 +18,8 @@ class GalleryController {
 
       const galleryData = {
         image,
-        caption: caption || ''
+        caption: caption || '',
+        sub_caption: sub_caption || null
       };
 
       const galleryId = await Gallery.create(galleryData);
@@ -93,7 +94,7 @@ class GalleryController {
   static async updateGallery(req, res) {
     try {
       const { id } = req.params;
-      const { caption, image } = req.body;
+      const { caption, sub_caption, image } = req.body;
 
       // Check if gallery item exists
       const existingGallery = await Gallery.getById(id);
@@ -106,6 +107,7 @@ class GalleryController {
 
       const updateData = {};
       if (caption !== undefined) updateData.caption = caption;
+      if (sub_caption !== undefined) updateData.sub_caption = sub_caption;
       if (image !== undefined) updateData.image = image;
 
       const affectedRows = await Gallery.update(id, updateData);
@@ -134,43 +136,52 @@ class GalleryController {
     }
   }
 
-  // Create gallery item with image upload (for multipart/form-data)
+  // Create gallery item(s) with image upload (supports single & multi upload)
   static async createGalleryWithImage(req, res) {
     try {
-      const { caption } = req.body;
+      const files = req.files;
       
-      if (!req.file) {
+      if (!files || files.length === 0) {
         return res.status(400).json({
           success: false,
-          message: 'No image file provided'
+          message: 'No image file(s) provided'
         });
       }
 
-      const imageUrl = `${process.env.APP_URI || ''}/gallery/${req.file.filename}`;
-      
-      const galleryData = {
-        image: imageUrl,
-        caption: caption || ''
-      };
+      // caption[] and sub_caption[] come as arrays from the form
+      const captions = Array.isArray(req.body.caption) ? req.body.caption : [req.body.caption || ''];
+      const subCaptions = Array.isArray(req.body.sub_caption) ? req.body.sub_caption : [req.body.sub_caption || ''];
 
-      const galleryId = await Gallery.create(galleryData);
-      const newGallery = await Gallery.getById(galleryId);
+      const items = files.map((file, index) => ({
+        image: `${process.env.APP_URI || ''}/gallery/${file.filename}`,
+        caption: captions[index] || '',
+        sub_caption: subCaptions[index] || null
+      }));
 
-      // If it's a browser request (EJS), we might want to redirect
+      const insertedIds = await Gallery.bulkCreate(items);
+
+      // If it's a browser request (EJS), redirect
       if (req.headers.accept && req.headers.accept.includes('text/html')) {
         return res.redirect('/admin/gallery?success=true');
       }
 
+      // Fetch all newly created items for API response
+      const newItems = [];
+      for (const id of insertedIds) {
+        const item = await Gallery.getById(id);
+        if (item) newItems.push(item);
+      }
+
       res.status(201).json({
         success: true,
-        message: 'Gallery item created successfully',
-        data: newGallery
+        message: `${newItems.length} gallery item(s) created successfully`,
+        data: newItems
       });
     } catch (error) {
       console.error('Create gallery with image error:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to create gallery item',
+        message: 'Failed to create gallery item(s)',
         error: error.message
       });
     }

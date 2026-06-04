@@ -38,10 +38,10 @@ galleryRouter.put('/gallery/update/:id', GalleryController.updateGallery);
 // Delete gallery item
 galleryRouter.delete('/gallery/delete/:id', GalleryController.deleteGallery);
 
-// Upload gallery image
+// Upload gallery image (single)
 galleryRouter.post('/gallery/image', upload.single('gallery_image'), GalleryController.uploadGalleryImage);
 
-// Create gallery item with image upload (Integrated)
-galleryRouter.post('/gallery/add', upload.single('gallery_image'), GalleryController.createGalleryWithImage);
+// Create gallery item(s) with image upload (supports multi-upload)
+galleryRouter.post('/gallery/add', upload.array('gallery_image', 20), GalleryController.createGalleryWithImage);
 
 module.exports = galleryRouter;

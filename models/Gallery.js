@@ -3,19 +3,45 @@ const { promisePool } = require('../config/database');
 class Gallery {
   // Create a new gallery item
   static async create(galleryData) {
-    const { image, caption } = galleryData;
+    const { image, caption, sub_caption } = galleryData;
     
     const query = `
-      INSERT INTO gallery (image, caption)
-      VALUES (?, ?)
+      INSERT INTO gallery (image, caption, sub_caption)
+      VALUES (?, ?, ?)
     `;
     
     const [result] = await promisePool.query(query, [
       image,
-      caption
+      caption,
+      sub_caption || null
     ]);
     
     return result.insertId;
+  }
+
+  // Bulk create gallery items
+  static async bulkCreate(items) {
+    if (!items || items.length === 0) return [];
+
+    const query = `
+      INSERT INTO gallery (image, caption, sub_caption)
+      VALUES ?
+    `;
+
+    const values = items.map(item => [
+      item.image,
+      item.caption || '',
+      item.sub_caption || null
+    ]);
+
+    const [result] = await promisePool.query(query, [values]);
+
+    // Return array of inserted IDs
+    const ids = [];
+    for (let i = 0; i < items.length; i++) {
+      ids.push(result.insertId + i);
+    }
+    return ids;
   }
 
   // Get all gallery items with pagination
@@ -23,7 +49,7 @@ class Gallery {
     const offset = (page - 1) * limit;
     
     const query = `
-      SELECT id, image, caption, created_at, updated_at
+      SELECT id, image, caption, sub_caption, created_at, updated_at
       FROM gallery
       ORDER BY created_at DESC
       LIMIT ? OFFSET ?
@@ -68,6 +94,10 @@ class Gallery {
     if (galleryData.caption !== undefined) {
       fields.push('caption = ?');
       values.push(galleryData.caption);
+    }
+    if (galleryData.sub_caption !== undefined) {
+      fields.push('sub_caption = ?');
+      values.push(galleryData.sub_caption);
     }
     
     if (fields.length === 0) {

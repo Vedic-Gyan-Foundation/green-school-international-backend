@@ -196,8 +196,9 @@
                         </div>
                         <div class="gallery-info">
                             <p class="gallery-caption" id="caption-<%= item.id %>"><%= item.caption || 'No caption' %></p>
+                            <p class="gallery-sub-caption" id="sub-caption-<%= item.id %>" style="margin:0 0 15px 0;font-size:13px;color:#777;"><%= item.sub_caption || '' %></p>
                             <div class="card-actions">
-                                <button class="btn btn-edit" onclick="openEditModal(<%= item.id %>, '<%= item.caption %>')">Edit</button>
+                                <button class="btn btn-edit" onclick="openEditModal(<%= item.id %>, '<%= (item.caption || '').replace(/'/g, "\\'") %>', '<%= (item.sub_caption || '').replace(/'/g, "\\'") %>')">Edit</button>
                                 <button class="btn btn-danger" onclick="deleteItem(<%= item.id %>)">Delete</button>
                             </div>
                         </div>
@@ -225,6 +226,10 @@
                     <label for="editCaption">Caption</label>
                     <input type="text" id="editCaption" required>
                 </div>
+                <div class="form-group">
+                    <label for="editSubCaption">Sub Caption</label>
+                    <input type="text" id="editSubCaption" placeholder="Optional sub-caption">
+                </div>
                 <div style="text-align: right;">
                     <button type="button" class="btn" onclick="closeModal()" style="background:#eee; color:#333; margin-right:10px;">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Changes</button>
@@ -237,9 +242,10 @@
         const modal = document.getElementById('editModal');
         const editForm = document.getElementById('editForm');
 
-        function openEditModal(id, caption) {
+        function openEditModal(id, caption, subCaption) {
             document.getElementById('editId').value = id;
             document.getElementById('editCaption').value = caption;
+            document.getElementById('editSubCaption').value = subCaption || '';
             modal.style.display = 'flex';
         }
 
@@ -258,6 +264,7 @@
             e.preventDefault();
             const id = document.getElementById('editId').value;
             const caption = document.getElementById('editCaption').value;
+            const sub_caption = document.getElementById('editSubCaption').value;
 
             try {
                 const response = await fetch(`/v1/gallery/update/${id}`, {
@@ -265,13 +272,14 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ caption })
+                    body: JSON.stringify({ caption, sub_caption })
                 });
 
                 const result = await response.json();
 
                 if (result.success) {
                     document.getElementById(`caption-${id}`).innerText = caption;
+                    document.getElementById(`sub-caption-${id}`).innerText = sub_caption || '';
                     closeModal();
                     alert('Updated successfully!');
                 } else {
