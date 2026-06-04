@@ -10,6 +10,10 @@ pageRouter.get('/add-blog', (req, res) => {
   res.render('./blogPage.ejs');
 });
 
+pageRouter.get('/admin/blogs/add', (req, res) => {
+  res.render('./blogPage.ejs');
+});
+
 pageRouter.get('/admission-dashboard', admissionController.renderDashboard);
 
 pageRouter.get('/admin/gallery/add', (req, res) => {
