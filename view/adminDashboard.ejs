@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - The Green School International</title>
+    <style>
+        :root {
+            --primary-color: #3d405b;
+            --secondary-color: #81b29a;
+            --accent-color: #f2cc8f;
+            --bg-color: #f4f1de;
+            --text-color: #3d405b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin-top: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .card h2 {
+            margin: 0 0 8px 0;
+            font-size: 20px;
+            color: var(--primary-color);
+        }
+
+        .card p {
+            margin: 0;
+            font-size: 14px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Dashboard</h1>
+        <p class="subtitle">The Green School International - Content Management</p>
+
+        <div class="cards">
+            <a href="/admin/gallery" class="card">
+                <div class="card-icon">🖼️</div>
+                <h2>Gallery</h2>
+                <p>Manage gallery images, upload new photos, edit captions, delete items</p>
+            </a>
+
+            <a href="/admin/blogs" class="card">
+                <div class="card-icon">📝</div>
+                <h2>Blogs</h2>
+                <p>Manage blog posts, edit content, delete articles</p>
+            </a>
+
+            <a href="/admission-dashboard" class="card">
+                <div class="card-icon">🎓</div>
+                <h2>Admissions</h2>
+                <p>View admission inquiries and student submissions</p>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

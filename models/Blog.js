@@ -111,6 +111,15 @@ class Blog {
     return result.affectedRows;
   }
 
+  // Bulk delete blogs
+  static async bulkDelete(ids) {
+    if (!ids || ids.length === 0) return 0;
+    const placeholders = ids.map(() => '?').join(',');
+    const query = `DELETE FROM blogs WHERE id IN (${placeholders})`;
+    const [result] = await promisePool.query(query, ids);
+    return result.affectedRows;
+  }
+
   // Search blogs
   static async search(searchTerm, page = 1, limit = 10) {
     const offset = (page - 1) * limit;

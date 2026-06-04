@@ -122,6 +122,15 @@ class Gallery {
     const [result] = await promisePool.query(query, [id]);
     return result.affectedRows;
   }
+
+  // Bulk delete gallery items
+  static async bulkDelete(ids) {
+    if (!ids || ids.length === 0) return 0;
+    const placeholders = ids.map(() => '?').join(',');
+    const query = `DELETE FROM gallery WHERE id IN (${placeholders})`;
+    const [result] = await promisePool.query(query, ids);
+    return result.affectedRows;
+  }
 }
 
 module.exports = Gallery;

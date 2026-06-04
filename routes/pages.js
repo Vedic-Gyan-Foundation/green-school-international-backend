@@ -20,4 +20,11 @@ pageRouter.get('/admin/gallery/add', (req, res) => {
 const GalleryController = require('../controllers/galleryController');
 pageRouter.get('/admin/gallery', GalleryController.renderGalleryViewer);
 
+const BlogController = require('../controllers/blogController');
+pageRouter.get('/admin/blogs', BlogController.renderBlogAdmin);
+
+pageRouter.get('/admin', (req, res) => {
+  res.render('adminDashboard.ejs');
+});
+
 module.exports = pageRouter

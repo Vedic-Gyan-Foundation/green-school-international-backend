@@ -38,6 +38,9 @@ galleryRouter.put('/gallery/update/:id', GalleryController.updateGallery);
 // Delete gallery item
 galleryRouter.delete('/gallery/delete/:id', GalleryController.deleteGallery);
 
+// Bulk delete gallery items
+galleryRouter.post('/gallery/delete-bulk', GalleryController.bulkDeleteGallery);
+
 // Upload gallery image (single)
 galleryRouter.post('/gallery/image', upload.single('gallery_image'), GalleryController.uploadGalleryImage);
 

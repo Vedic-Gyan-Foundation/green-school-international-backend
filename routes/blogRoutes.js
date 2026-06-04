@@ -38,6 +38,9 @@ blogRouter.put('/blog/update/:id', BlogController.updateBlog);
 // Delete blog
 blogRouter.delete('/blog/delete/:id', BlogController.deleteBlog);
 
+// Bulk delete blogs
+blogRouter.post('/blog/delete-bulk', BlogController.bulkDeleteBlogs);
+
 // Upload blog Image
 blogRouter.post('/blog/image', upload.single('blog_image'), BlogController.uploadBlogImage)
 

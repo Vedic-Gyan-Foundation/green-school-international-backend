@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Management - The Green School International</title>
+    <style>
+        :root {
+            --primary-color: #3d405b;
+            --secondary-color: #81b29a;
+            --accent-color: #f2cc8f;
+            --bg-color: #f4f1de;
+            --text-color: #3d405b;
+            --danger-color: #e07a5f;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-color);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary:hover { background-color: #2a2c3e; }
+        
+        .btn-danger { background-color: var(--danger-color); color: white; }
+        .btn-danger:hover { background-color: #c05c45; }
+
+        .btn-edit { background-color: var(--secondary-color); color: white; }
+        .btn-edit:hover { background-color: #6a967e; }
+
+        .blog-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .blog-table th,
+        .blog-table td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .blog-table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        .blog-table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .blog-table img {
+            width: 80px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .blog-title {
+            font-weight: 500;
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .blog-excerpt {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .close {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .close:hover { color: black; }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/admin" class="back-link">&larr; Back to Admin Dashboard</a>
+        <header>
+            <h1>Blog Management</h1>
+            <div class="header-actions">
+                <button class="btn btn-danger" id="bulkDeleteBtn" style="display:none;" onclick="bulkDelete()">Delete Selected (<span id="selectedCount">0</span>)</button>
+                <a href="/add-blog" class="btn btn-primary">+ Create Blog</a>
+            </div>
+        </header>
+
+        <% if (blogs && blogs.length > 0) { %>
+            <table class="blog-table">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th>
+                        <th>Cover</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Read Time</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% blogs.forEach(blog => { %>
+                        <tr id="row-<%= blog.id %>">
+                            <td><input type="checkbox" class="item-checkbox" data-id="<%= blog.id %>" onchange="updateSelection()"></td>
+                            <td>
+                                <% if (blog.cover_image) { %>
+                                    <img src="<%= blog.cover_image %>" alt="cover" onerror="this.src='https://via.placeholder.com/80x50?text=No+Image'">
+                                <% } else { %>
+                                    <span style="color:#aaa;font-size:12px;">No image</span>
+                                <% } %>
+                            </td>
+                            <td class="blog-title"><%= blog.title %></td>
+                            <td><%= blog.author %></td>
+                            <td><%= blog.read_time || '-' %></td>
+                            <td><%= new Date(blog.created_at).toLocaleDateString() %></td>
+                            <td>
+                                <div class="actions-cell">
+                                    <button class="btn btn-edit btn-sm" onclick="openEditModal(<%= blog.id %>)">Edit</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteItem(<%= blog.id %>)">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <div class="empty-state">
+                <h3>No blog posts found.</h3>
+                <p>Click "Create Blog" to write your first post.</p>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Blog Post</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label for="editTitle">Title</label>
+                    <input type="text" id="editTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="editAuthor">Author</label>
+                    <input type="text" id="editAuthor" required>
+                </div>
+                <div class="form-group">
+                    <label for="editReadTime">Read Time</label>
+                    <input type="text" id="editReadTime" placeholder="e.g. 5 min read">
+                </div>
+                <div class="form-group">
+                    <label for="editCoverImage">Cover Image URL</label>
+                    <input type="text" id="editCoverImage">
+                </div>
+                <div class="form-group">
+                    <label for="editContent">Content</label>
+                    <textarea id="editContent" required></textarea>
+                </div>
+                <div style="text-align: right;">
+                    <button type="button" class="btn" onclick="closeModal()" style="background:#eee; color:#333; margin-right:10px;">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('editModal');
+        const editForm = document.getElementById('editForm');
+
+        async function openEditModal(id) {
+            try {
+                const response = await fetch(`/v1/blog/readOne/${id}`);
+                const result = await response.json();
+                if (!result.success) { alert('Failed to fetch blog'); return; }
+
+                const blog = result.data;
+                document.getElementById('editId').value = blog.id;
+                document.getElementById('editTitle').value = blog.title || '';
+                document.getElementById('editAuthor').value = blog.author || '';
+                document.getElementById('editReadTime').value = blog.read_time || '';
+                document.getElementById('editCoverImage').value = blog.cover_image || '';
+                document.getElementById('editContent').value = blog.content || '';
+                modal.style.display = 'flex';
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to load blog data.');
+            }
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) closeModal();
+        }
+
+        editForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const data = {
+                title: document.getElementById('editTitle').value,
+                author: document.getElementById('editAuthor').value,
+                read_time: document.getElementById('editReadTime').value,
+                cover_image: document.getElementById('editCoverImage').value,
+                content: document.getElementById('editContent').value
+            };
+
+            try {
+                const response = await fetch(`/v1/blog/update/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    closeModal();
+                    alert('Blog updated successfully!');
+                    location.reload();
+                } else {
+                    alert('Update failed: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while updating.');
+            }
+        };
+
+        async function deleteItem(id) {
+            if (!confirm('Are you sure you want to delete this blog post?')) return;
+
+            try {
+                const response = await fetch(`/v1/blog/delete/${id}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    const row = document.getElementById(`row-${id}`);
+                    row.style.opacity = '0';
+                    setTimeout(() => {
+                        row.remove();
+                        if (document.querySelectorAll('.item-checkbox').length === 0) {
+                            location.reload();
+                        }
+                    }, 300);
+                } else {
+                    alert('Delete failed: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while deleting.');
+            }
+        }
+
+        // Multi-select functions
+        function updateSelection() {
+            const checkboxes = document.querySelectorAll('.item-checkbox:checked');
+            const count = checkboxes.length;
+            document.getElementById('selectedCount').textContent = count;
+            document.getElementById('bulkDeleteBtn').style.display = count > 0 ? 'inline-block' : 'none';
+
+            const allCheckboxes = document.querySelectorAll('.item-checkbox');
+            document.getElementById('selectAll').checked = count === allCheckboxes.length && count > 0;
+        }
+
+        function toggleSelectAll(el) {
+            const checkboxes = document.querySelectorAll('.item-checkbox');
+            checkboxes.forEach(cb => cb.checked = el.checked);
+            updateSelection();
+        }
+
+        async function bulkDelete() {
+            const checkboxes = document.querySelectorAll('.item-checkbox:checked');
+            const ids = Array.from(checkboxes).map(cb => parseInt(cb.dataset.id));
+
+            if (ids.length === 0) return;
+            if (!confirm(`Are you sure you want to delete ${ids.length} blog post(s)?`)) return;
+
+            try {
+                const response = await fetch('/v1/blog/delete-bulk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    ids.forEach(id => {
+                        const row = document.getElementById(`row-${id}`);
+                        if (row) row.remove();
+                    });
+                    document.getElementById('selectAll').checked = false;
+                    updateSelection();
+                    alert(`${result.deletedCount} blog(s) deleted successfully!`);
+                    if (document.querySelectorAll('.item-checkbox').length === 0) {
+                        location.reload();
+                    }
+                } else {
+                    alert('Bulk delete failed: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while deleting.');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -265,6 +265,35 @@ class GalleryController {
       res.status(500).send('Internal Server Error');
     }
   }
+
+  // Bulk delete gallery items
+  static async bulkDeleteGallery(req, res) {
+    try {
+      const { ids } = req.body;
+
+      if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please provide an array of IDs to delete'
+        });
+      }
+
+      const affectedRows = await Gallery.bulkDelete(ids.map(id => parseInt(id)));
+
+      res.status(200).json({
+        success: true,
+        message: `${affectedRows} gallery item(s) deleted successfully`,
+        deletedCount: affectedRows
+      });
+    } catch (error) {
+      console.error('Bulk delete gallery error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to delete gallery items',
+        error: error.message
+      });
+    }
+  }
 }
 
 module.exports = GalleryController;

@@ -182,16 +182,22 @@
 </head>
 <body>
     <div class="container">
+        <a href="/admin" style="display:inline-block;margin-bottom:20px;color:#3d405b;text-decoration:none;font-size:14px;">&larr; Back to Admin Dashboard</a>
         <header>
             <h1>Gallery Management</h1>
-            <a href="/admin/gallery/add" class="btn btn-primary">+ Add New Item</a>
+            <div style="display:flex;gap:10px;align-items:center;">
+                <button class="btn btn-danger" id="bulkDeleteBtn" style="display:none;" onclick="bulkDelete()">Delete Selected (<span id="selectedCount">0</span>)</button>
+                <label style="cursor:pointer;font-size:14px;"><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"> Select All</label>
+                <a href="/admin/gallery/add" class="btn btn-primary">+ Add New Item</a>
+            </div>
         </header>
 
         <div class="gallery-grid">
             <% if (galleryItems && galleryItems.length > 0) { %>
                 <% galleryItems.forEach(item => { %>
                     <div class="gallery-card" id="card-<%= item.id %>">
-                        <div class="gallery-img-container">
+                        <div class="gallery-img-container" style="position:relative;">
+                            <input type="checkbox" class="item-checkbox" data-id="<%= item.id %>" onchange="updateSelection()" style="position:absolute;top:10px;left:10px;width:20px;height:20px;z-index:10;cursor:pointer;">
                             <img src="<%= item.image %>" alt="<%= item.caption %>" onerror="this.src='https://via.placeholder.com/400x300?text=Image+Not+Found'">
                         </div>
                         <div class="gallery-info">
@@ -307,11 +313,64 @@
                     setTimeout(() => {
                         card.remove();
                         if (document.querySelectorAll('.gallery-card').length === 0) {
-                            location.reload(); // Show empty state
+                            location.reload();
                         }
                     }, 300);
                 } else {
                     alert('Delete failed: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while deleting.');
+            }
+        }
+
+        // Multi-select functions
+        function updateSelection() {
+            const checkboxes = document.querySelectorAll('.item-checkbox:checked');
+            const count = checkboxes.length;
+            document.getElementById('selectedCount').textContent = count;
+            document.getElementById('bulkDeleteBtn').style.display = count > 0 ? 'inline-block' : 'none';
+
+            const allCheckboxes = document.querySelectorAll('.item-checkbox');
+            document.getElementById('selectAll').checked = count === allCheckboxes.length && count > 0;
+        }
+
+        function toggleSelectAll(el) {
+            const checkboxes = document.querySelectorAll('.item-checkbox');
+            checkboxes.forEach(cb => cb.checked = el.checked);
+            updateSelection();
+        }
+
+        async function bulkDelete() {
+            const checkboxes = document.querySelectorAll('.item-checkbox:checked');
+            const ids = Array.from(checkboxes).map(cb => parseInt(cb.dataset.id));
+
+            if (ids.length === 0) return;
+            if (!confirm(`Are you sure you want to delete ${ids.length} item(s)?`)) return;
+
+            try {
+                const response = await fetch('/v1/gallery/delete-bulk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    ids.forEach(id => {
+                        const card = document.getElementById(`card-${id}`);
+                        if (card) card.remove();
+                    });
+                    document.getElementById('selectAll').checked = false;
+                    updateSelection();
+                    alert(`${result.deletedCount} item(s) deleted successfully!`);
+                    if (document.querySelectorAll('.gallery-card').length === 0) {
+                        location.reload();
+                    }
+                } else {
+                    alert('Bulk delete failed: ' + result.message);
                 }
             } catch (error) {
                 console.error('Error:', error);
