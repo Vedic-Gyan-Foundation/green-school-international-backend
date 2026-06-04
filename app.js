@@ -8,6 +8,7 @@ const routes = require('./routes/route')
 const pageRoutes = require('./routes/pages')
 const blogRoutes = require('./routes/blogRoutes');
 const admissionRoutes = require('./routes/admissionRoutes');
+const galleryRoutes = require('./routes/galleryRoutes');
 const { testConnection } = require('./config/database');
 
 const app = express();
@@ -25,6 +26,7 @@ app.use('/api', routes)
 app.use('/', pageRoutes)
 app.use('/v1', blogRoutes)
 app.use('/v1', admissionRoutes)
+app.use('/v1', galleryRoutes)
 
 app.get('/apiv1', (req, res) => {
   res.json({

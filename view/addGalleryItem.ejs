@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Gallery Item - The Green School International</title>
+    <style>
+        :root {
+            --primary-color: #3d405b;
+            --secondary-color: #81b29a;
+            --accent-color: #f2cc8f;
+            --bg-color: #f4f1de;
+            --text-color: #3d405b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2a2c3e;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Add Gallery Item</h1>
+
+        <% if (locals.success) { %>
+            <div class="alert alert-success">
+                Gallery item added successfully!
+            </div>
+        <% } %>
+
+        <form action="/v1/gallery/add" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="caption">Caption</label>
+                <input type="text" id="caption" name="caption" placeholder="Enter image caption..." required>
+            </div>
+
+            <div class="form-group">
+                <label for="gallery_image">Select Image</label>
+                <input type="file" id="gallery_image" name="gallery_image" accept="image/*" required>
+            </div>
+
+            <button type="submit">Upload & Create</button>
+        </form>
+
+        <a href="/v1/gallery/readAll" class="back-link">View All Gallery Items</a>
+    </div>
+</body>
+</html>

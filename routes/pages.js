@@ -13,5 +13,11 @@ pageRouter.get('/add-blog', (req, res)=> {
 
 pageRouter.get('/admission-dashboard', admissionController.renderDashboard)
 
+pageRouter.get('/admin/gallery/add', (req, res) => {
+  res.render('addGalleryItem.ejs', { success: req.query.success === 'true' });
+});
+
+const GalleryController = require('../controllers/galleryController');
+pageRouter.get('/admin/gallery', GalleryController.renderGalleryViewer);
 
 module.exports = pageRouter

@@ -61,6 +61,21 @@ const initDatabase = async () => {
     await connection.query(createAdmissionsTable);
     console.log('✅ Table "admissions" created/verified');
 
+    // Create gallery table
+    const createGalleryTable = `
+      CREATE TABLE IF NOT EXISTS gallery (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        image VARCHAR(500) NOT NULL,
+        caption VARCHAR(255),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_created_at (created_at)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `;
+
+    await connection.query(createGalleryTable);
+    console.log('✅ Table "gallery" created/verified');
+
     // Insert sample data
     const checkData = await connection.query('SELECT COUNT(*) as count FROM blogs');
     const count = checkData[0][0].count;

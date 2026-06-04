@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery Management - The Green School International</title>
+    <style>
+        :root {
+            --primary-color: #3d405b;
+            --secondary-color: #81b29a;
+            --accent-color: #f2cc8f;
+            --bg-color: #f4f1de;
+            --text-color: #3d405b;
+            --danger-color: #e07a5f;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary:hover { background-color: #2a2c3e; }
+        
+        .btn-danger { background-color: var(--danger-color); color: white; }
+        .btn-danger:hover { background-color: #c05c45; }
+
+        .btn-edit { background-color: var(--secondary-color); color: white; margin-right: 5px; }
+        .btn-edit:hover { background-color: #6a967e; }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .gallery-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .gallery-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .gallery-img-container {
+            height: 200px;
+            overflow: hidden;
+            background-color: #eee;
+        }
+
+        .gallery-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-info {
+            padding: 15px;
+        }
+
+        .gallery-caption {
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--primary-color);
+            min-height: 1.2em;
+        }
+
+        .card-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .close {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .close:hover { color: black; }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            background: white;
+            border-radius: 8px;
+            grid-column: 1 / -1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Gallery Management</h1>
+            <a href="/admin/gallery/add" class="btn btn-primary">+ Add New Item</a>
+        </header>
+
+        <div class="gallery-grid">
+            <% if (galleryItems && galleryItems.length > 0) { %>
+                <% galleryItems.forEach(item => { %>
+                    <div class="gallery-card" id="card-<%= item.id %>">
+                        <div class="gallery-img-container">
+                            <img src="<%= item.image %>" alt="<%= item.caption %>" onerror="this.src='https://via.placeholder.com/400x300?text=Image+Not+Found'">
+                        </div>
+                        <div class="gallery-info">
+                            <p class="gallery-caption" id="caption-<%= item.id %>"><%= item.caption || 'No caption' %></p>
+                            <div class="card-actions">
+                                <button class="btn btn-edit" onclick="openEditModal(<%= item.id %>, '<%= item.caption %>')">Edit</button>
+                                <button class="btn btn-danger" onclick="deleteItem(<%= item.id %>)">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="empty-state">
+                    <h3>No gallery items found.</h3>
+                    <p>Click the "Add New Item" button to get started.</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Gallery Item</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label for="editCaption">Caption</label>
+                    <input type="text" id="editCaption" required>
+                </div>
+                <div style="text-align: right;">
+                    <button type="button" class="btn" onclick="closeModal()" style="background:#eee; color:#333; margin-right:10px;">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('editModal');
+        const editForm = document.getElementById('editForm');
+
+        function openEditModal(id, caption) {
+            document.getElementById('editId').value = id;
+            document.getElementById('editCaption').value = caption;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        editForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const caption = document.getElementById('editCaption').value;
+
+            try {
+                const response = await fetch(`/v1/gallery/update/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ caption })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById(`caption-${id}`).innerText = caption;
+                    closeModal();
+                    alert('Updated successfully!');
+                } else {
+                    alert('Update failed: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while updating.');
+            }
+        };
+
+        async function deleteItem(id) {
+            if (!confirm('Are you sure you want to delete this gallery item?')) return;
+
+            try {
+                const response = await fetch(`/v1/gallery/delete/${id}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    const card = document.getElementById(`card-${id}`);
+                    card.style.opacity = '0';
+                    setTimeout(() => {
+                        card.remove();
+                        if (document.querySelectorAll('.gallery-card').length === 0) {
+                            location.reload(); // Show empty state
+                        }
+                    }, 300);
+                } else {
+                    alert('Delete failed: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while deleting.');
+            }
+        }
+    </script>
+</body>
+</html>
