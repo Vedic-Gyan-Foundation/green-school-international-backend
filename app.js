@@ -1,11 +1,11 @@
 const express = require('express');
 const path = require('path');
-const ejs = require('ejs')
-const cors = require('cors')
+const ejs = require('ejs');
+const cors = require('cors');
 const bodyParser = require('body-parser');
 
-const routes = require('./routes/route')
-const pageRoutes = require('./routes/pages')
+const routes = require('./routes/route');
+const pageRoutes = require('./routes/pages');
 const blogRoutes = require('./routes/blogRoutes');
 const admissionRoutes = require('./routes/admissionRoutes');
 const galleryRoutes = require('./routes/galleryRoutes');
@@ -14,19 +14,19 @@ const { testConnection } = require('./config/database');
 const app = express();
 const port = 3000;
 
-app.use(cors())
-app.use(express.urlencoded({extended: true}))
+app.use(cors());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-app.set('views', __dirname + '/view')
-app.set('view engine', ejs)
+app.set('views', __dirname + '/view');
+app.set('view engine', ejs);
 // app.use(cookieParser());
 
-app.use('/api', routes)
-app.use('/', pageRoutes)
-app.use('/v1', blogRoutes)
-app.use('/v1', admissionRoutes)
-app.use('/v1', galleryRoutes)
+app.use('/api', routes);
+app.use('/', pageRoutes);
+app.use('/v1', blogRoutes);
+app.use('/v1', admissionRoutes);
+app.use('/v1', galleryRoutes);
 
 app.get('/apiv1', (req, res) => {
   res.json({
@@ -34,8 +34,7 @@ app.get('/apiv1', (req, res) => {
   });
 });
 
-
-testConnection()
+testConnection();
 
 // Start the server
 app.listen(port, () => {

@@ -120,7 +120,7 @@ class BlogController {
       // Handle cover image update
       if (req.file) {
         updateData.cover_image = `/uploads/${req.file.filename}`;
-        
+
         // Delete old image if exists and is a local file
         if (existingBlog.cover_image && existingBlog.cover_image.startsWith('/uploads/')) {
           const oldImagePath = path.join(__dirname, '..', existingBlog.cover_image);
@@ -237,11 +237,10 @@ class BlogController {
     }
   }
 
-
-  // Upload image 
+  // Upload image
   static async uploadBlogImage(req, res) {
-    const filename = req.file && `${process.env.APP_URI}/blogs/${req.file.filename}`
-    res.status(200).json({success: true, url: filename})
+    const filename = req.file && `${process.env.APP_URI}/blogs/${req.file.filename}`;
+    res.status(200).json({ success: true, url: filename });
   }
 
   // Bulk delete blogs
@@ -256,7 +255,7 @@ class BlogController {
         });
       }
 
-      const affectedRows = await Blog.bulkDelete(ids.map(id => parseInt(id)));
+      const affectedRows = await Blog.bulkDelete(ids.map((id) => parseInt(id)));
 
       res.status(200).json({
         success: true,

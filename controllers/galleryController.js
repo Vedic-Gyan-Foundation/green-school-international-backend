@@ -140,7 +140,7 @@ class GalleryController {
   static async createGalleryWithImage(req, res) {
     try {
       const files = req.files;
-      
+
       if (!files || files.length === 0) {
         return res.status(400).json({
           success: false,
@@ -149,8 +149,12 @@ class GalleryController {
       }
 
       // caption[] and sub_caption[] come as arrays from the form
-      const captions = Array.isArray(req.body.caption) ? req.body.caption : [req.body.caption || ''];
-      const subCaptions = Array.isArray(req.body.sub_caption) ? req.body.sub_caption : [req.body.sub_caption || ''];
+      const captions = Array.isArray(req.body.caption)
+        ? req.body.caption
+        : [req.body.caption || ''];
+      const subCaptions = Array.isArray(req.body.sub_caption)
+        ? req.body.sub_caption
+        : [req.body.sub_caption || ''];
 
       const items = files.map((file, index) => ({
         image: `${process.env.APP_URI || ''}/gallery/${file.filename}`,
@@ -237,7 +241,7 @@ class GalleryController {
           message: 'No image file provided'
         });
       }
-      
+
       const filename = `${process.env.APP_URI}/gallery/${req.file.filename}`;
       res.status(200).json({
         success: true,
@@ -278,7 +282,7 @@ class GalleryController {
         });
       }
 
-      const affectedRows = await Gallery.bulkDelete(ids.map(id => parseInt(id)));
+      const affectedRows = await Gallery.bulkDelete(ids.map((id) => parseInt(id)));
 
       res.status(200).json({
         success: true,

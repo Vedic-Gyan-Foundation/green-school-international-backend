@@ -3,7 +3,7 @@ require('dotenv').config();
 
 const initDatabase = async () => {
   let connection;
-  
+
   try {
     // Connect to MySQL server without database
     connection = await mysql.createConnection({
@@ -95,7 +95,6 @@ const initDatabase = async () => {
     }
 
     console.log('🎉 Database initialization completed successfully!');
-    
   } catch (error) {
     console.error('❌ Database initialization failed:', error.message);
     throw error;
