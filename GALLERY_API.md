@@ -23,12 +23,14 @@ Creates a new item in the gallery.
 | :--- | :--- | :--- | :--- |
 | `image` | `string` | **Yes** | URL or filename of the image. |
 | `caption` | `string` | No | Caption text for the image. |
+| `sub_caption` | `string` | No | Sub-caption text for the image. |
 
 **Example:**
 ```json
 {
   "image": "http://example.com/gallery/image.jpg",
-  "caption": "School Annual Day"
+  "caption": "School Annual Day",
+  "sub_caption": "Held on December 2025"
 }
 ```
 
@@ -71,6 +73,7 @@ Updates an existing gallery item metadata.
 | :--- | :--- | :--- | :--- |
 | `image` | `string` | No | Updated URL or filename of the image. |
 | `caption` | `string` | No | Updated caption text. |
+| `sub_caption` | `string` | No | Updated sub-caption text. |
 
 ### 5. Delete Gallery Item
 Removes a gallery item from the database.
@@ -107,6 +110,7 @@ Uploads an image and creates a gallery entry in one request.
 | :--- | :--- | :--- | :--- |
 | `gallery_image` | `file` | **Yes** | The image file to be uploaded. |
 | `caption` | `string` | No | Caption text for the image. |
+| `sub_caption` | `string` | No | Sub-caption text for the image. |
 
 ---
 

@@ -6,7 +6,7 @@ class GalleryController {
   // Create a new gallery item
   static async createGallery(req, res) {
     try {
-      const { caption, image } = req.body;
+      const { caption, sub_caption, image } = req.body;
 
       // Validation
       if (!image) {
@@ -18,7 +18,8 @@ class GalleryController {
 
       const galleryData = {
         image,
-        caption: caption || ''
+        caption: caption || '',
+        sub_caption: sub_caption || ''
       };
 
       const galleryId = await Gallery.create(galleryData);
@@ -93,7 +94,7 @@ class GalleryController {
   static async updateGallery(req, res) {
     try {
       const { id } = req.params;
-      const { caption, image } = req.body;
+      const { caption, sub_caption, image } = req.body;
 
       // Check if gallery item exists
       const existingGallery = await Gallery.getById(id);
@@ -106,6 +107,7 @@ class GalleryController {
 
       const updateData = {};
       if (caption !== undefined) updateData.caption = caption;
+      if (sub_caption !== undefined) updateData.sub_caption = sub_caption;
       if (image !== undefined) updateData.image = image;
 
       const affectedRows = await Gallery.update(id, updateData);
@@ -137,7 +139,7 @@ class GalleryController {
   // Create gallery item with image upload (for multipart/form-data)
   static async createGalleryWithImage(req, res) {
     try {
-      const { caption } = req.body;
+      const { caption, sub_caption } = req.body;
       
       if (!req.file) {
         return res.status(400).json({
@@ -150,7 +152,8 @@ class GalleryController {
       
       const galleryData = {
         image: imageUrl,
-        caption: caption || ''
+        caption: caption || '',
+        sub_caption: sub_caption || ''
       };
 
       const galleryId = await Gallery.create(galleryData);
