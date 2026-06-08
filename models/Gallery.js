@@ -4,14 +4,12 @@ class Gallery {
   // Create a new gallery item
   static async create(galleryData) {
     const { image, caption, sub_caption } = galleryData;
-
     const query = `
       INSERT INTO gallery (image, caption, sub_caption)
       VALUES (?, ?, ?)
     `;
 
     const [result] = await promisePool.query(query, [image, caption, sub_caption || null]);
-
     return result.insertId;
   }
 
@@ -91,7 +89,6 @@ class Gallery {
       fields.push('sub_caption = ?');
       values.push(galleryData.sub_caption);
     }
-
     if (fields.length === 0) {
       throw new Error('No fields to update');
     }

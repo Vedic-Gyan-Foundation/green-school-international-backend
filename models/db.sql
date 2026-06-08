@@ -35,11 +35,11 @@ CREATE TABLE IF NOT EXISTS gallery (
   id INT AUTO_INCREMENT PRIMARY KEY,
   image VARCHAR(500) NOT NULL,
   caption VARCHAR(255),
-  sub_caption VARCHAR(255),
+  sub_caption TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Migration: Add sub_caption column if table already exists
--- ALTER TABLE gallery ADD COLUMN sub_caption VARCHAR(255) AFTER caption;
+-- ALTER TABLE gallery ADD COLUMN sub_caption TEXT AFTER caption;
