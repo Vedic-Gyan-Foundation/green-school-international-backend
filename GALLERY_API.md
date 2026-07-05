@@ -22,17 +22,19 @@ Creates a new item in the gallery.
 
 #### Request Body (JSON)
 
-| Field     | Type     | Required | Description                   |
-| :-------- | :------- | :------- | :---------------------------- |
-| `image`   | `string` | **Yes**  | URL or filename of the image. |
-| `caption` | `string` | No       | Caption text for the image.   |
+| Field         | Type     | Required | Description                     |
+| :------------ | :------- | :------- | :------------------------------ |
+| `image`       | `string` | **Yes**  | URL or filename of the image.   |
+| `caption`     | `string` | No       | Caption text for the image.     |
+| `sub_caption` | `string` | No       | Sub-caption text for the image. |
 
 **Example:**
 
 ```json
 {
   "image": "http://example.com/gallery/image.jpg",
-  "caption": "School Annual Day"
+  "caption": "School Annual Day",
+  "sub_caption": "Held on December 2025"
 }
 ```
 
@@ -78,10 +80,11 @@ Updates an existing gallery item metadata.
 
 #### Request Body (JSON)
 
-| Field     | Type     | Required | Description                           |
-| :-------- | :------- | :------- | :------------------------------------ |
-| `image`   | `string` | No       | Updated URL or filename of the image. |
-| `caption` | `string` | No       | Updated caption text.                 |
+| Field         | Type     | Required | Description                           |
+| :------------ | :------- | :------- | :------------------------------------ |
+| `image`       | `string` | No       | Updated URL or filename of the image. |
+| `caption`     | `string` | No       | Updated caption text.                 |
+| `sub_caption` | `string` | No       | Updated sub-caption text.             |
 
 ### 5. Delete Gallery Item
 
@@ -120,10 +123,11 @@ Uploads an image and creates a gallery entry in one request.
 
 #### Request Body (Form Data)
 
-| Field           | Type     | Required | Description                    |
-| :-------------- | :------- | :------- | :----------------------------- |
-| `gallery_image` | `file`   | **Yes**  | The image file to be uploaded. |
-| `caption`       | `string` | No       | Caption text for the image.    |
+| Field           | Type     | Required | Description                     |
+| :-------------- | :------- | :------- | :------------------------------ |
+| `gallery_image` | `file`   | **Yes**  | The image file to be uploaded.  |
+| `caption`       | `string` | No       | Caption text for the image.     |
+| `sub_caption`   | `string` | No       | Sub-caption text for the image. |
 
 ---
 
