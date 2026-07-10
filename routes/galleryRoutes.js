@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
   filename: function (req, file, cb) {
     const ext = path.extname(file.originalname);
     const name = path.basename(file.originalname, ext).replace(/\s+/g, '_');
-    const timestamp = new Date().toISOString().replace(/[-:.]/g, "");
+    const timestamp = new Date().toISOString().replace(/[-:.]/g, '');
     cb(null, `gallery_${name}_${timestamp}${ext}`);
   }
 });
@@ -38,10 +38,21 @@ galleryRouter.put('/gallery/update/:id', GalleryController.updateGallery);
 // Delete gallery item
 galleryRouter.delete('/gallery/delete/:id', GalleryController.deleteGallery);
 
-// Upload gallery image
-galleryRouter.post('/gallery/image', upload.single('gallery_image'), GalleryController.uploadGalleryImage);
+// Bulk delete gallery items
+galleryRouter.post('/gallery/delete-bulk', GalleryController.bulkDeleteGallery);
 
-// Create gallery item with image upload (Integrated)
-galleryRouter.post('/gallery/add', upload.single('gallery_image'), GalleryController.createGalleryWithImage);
+// Upload gallery image (single)
+galleryRouter.post(
+  '/gallery/image',
+  upload.single('gallery_image'),
+  GalleryController.uploadGalleryImage
+);
+
+// Create gallery item(s) with image upload (supports multi-upload)
+galleryRouter.post(
+  '/gallery/add',
+  upload.array('gallery_image', 20),
+  GalleryController.createGalleryWithImage
+);
 
 module.exports = galleryRouter;

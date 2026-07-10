@@ -4,12 +4,12 @@ class Blog {
   // Create a new blog
   static async create(blogData) {
     const { title, cover_image, author, read_time, content } = blogData;
-    
+
     const query = `
       INSERT INTO blogs (title, cover_image, author, read_time, content)
       VALUES (?, ?, ?, ?, ?)
     `;
-    
+
     const [result] = await promisePool.query(query, [
       title,
       cover_image,
@@ -17,14 +17,14 @@ class Blog {
       read_time,
       content
     ]);
-    
+
     return result.insertId;
   }
 
   // Get all blogs with pagination
   static async getAll(page = 1, limit = 10) {
     const offset = (page - 1) * limit;
-    
+
     const query = `
       SELECT id, title, cover_image, author, read_time, 
              SUBSTRING(content, 1, 200) as excerpt,
@@ -33,13 +33,13 @@ class Blog {
       ORDER BY created_at DESC
       LIMIT ? OFFSET ?
     `;
-    
+
     const [rows] = await promisePool.query(query, [parseInt(limit), parseInt(offset)]);
-    
+
     // Get total count
     const [countResult] = await promisePool.query('SELECT COUNT(*) as total FROM blogs');
     const total = countResult[0].total;
-    
+
     return {
       blogs: rows,
       pagination: {
@@ -56,7 +56,7 @@ class Blog {
     const query = `
       SELECT * FROM blogs WHERE id = ?
     `;
-    
+
     const [rows] = await promisePool.query(query, [id]);
     return rows[0] || null;
   }
@@ -65,7 +65,7 @@ class Blog {
   static async update(id, blogData) {
     const fields = [];
     const values = [];
-    
+
     // Dynamically build update query based on provided fields
     if (blogData.title !== undefined) {
       fields.push('title = ?');
@@ -87,19 +87,19 @@ class Blog {
       fields.push('content = ?');
       values.push(blogData.content);
     }
-    
+
     if (fields.length === 0) {
       throw new Error('No fields to update');
     }
-    
+
     values.push(id);
-    
+
     const query = `
       UPDATE blogs
       SET ${fields.join(', ')}
       WHERE id = ?
     `;
-    
+
     const [result] = await promisePool.query(query, values);
     return result.affectedRows;
   }
@@ -111,10 +111,19 @@ class Blog {
     return result.affectedRows;
   }
 
+  // Bulk delete blogs
+  static async bulkDelete(ids) {
+    if (!ids || ids.length === 0) return 0;
+    const placeholders = ids.map(() => '?').join(',');
+    const query = `DELETE FROM blogs WHERE id IN (${placeholders})`;
+    const [result] = await promisePool.query(query, ids);
+    return result.affectedRows;
+  }
+
   // Search blogs
   static async search(searchTerm, page = 1, limit = 10) {
     const offset = (page - 1) * limit;
-    
+
     const query = `
       SELECT id, title, cover_image, author, read_time,
              SUBSTRING(content, 1, 200) as excerpt,
@@ -124,7 +133,7 @@ class Blog {
       ORDER BY created_at DESC
       LIMIT ? OFFSET ?
     `;
-    
+
     const searchPattern = `%${searchTerm}%`;
     const [rows] = await promisePool.query(query, [
       searchPattern,
@@ -133,7 +142,7 @@ class Blog {
       parseInt(limit),
       parseInt(offset)
     ]);
-    
+
     // Get total count
     const countQuery = `
       SELECT COUNT(*) as total FROM blogs
@@ -145,7 +154,7 @@ class Blog {
       searchPattern
     ]);
     const total = countResult[0].total;
-    
+
     return {
       blogs: rows,
       pagination: {

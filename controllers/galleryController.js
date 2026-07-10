@@ -3,6 +3,38 @@ const fs = require('fs');
 const path = require('path');
 
 class GalleryController {
+  static buildGalleryImageUrl(req, filename) {
+    const protocol = req.secure || req.protocol === 'https' ? 'https' : 'http';
+    const host = req.get('host');
+    return `${protocol}://${host}/gallery/${filename}`;
+  }
+
+  static normalizeGalleryImageUrl(image, req) {
+    if (!image) return '';
+
+    const protocol = req.secure || req.protocol === 'https' ? 'https' : 'http';
+    const host = req.get('host');
+    const currentBase = `${protocol}://${host}`;
+
+    if (/^https?:\/\//i.test(image)) {
+      try {
+        const parsedUrl = new URL(image);
+        if (parsedUrl.host === host) {
+          return image;
+        }
+        return `${currentBase}${parsedUrl.pathname || '/'}`;
+      } catch (error) {
+        return `${currentBase}/${image.replace(/^\/+/, '')}`;
+      }
+    }
+
+    if (image.startsWith('/')) {
+      return `${currentBase}${image}`;
+    }
+
+    return `${currentBase}/${image.replace(/^\/+/, '')}`;
+  }
+
   // Create a new gallery item
   static async createGallery(req, res) {
     try {
@@ -17,9 +49,9 @@ class GalleryController {
       }
 
       const galleryData = {
-        image,
+        image: GalleryController.normalizeGalleryImageUrl(image, req),
         caption: caption || '',
-        sub_caption: sub_caption || ''
+        sub_caption: sub_caption || null
       };
 
       const galleryId = await Gallery.create(galleryData);
@@ -136,44 +168,56 @@ class GalleryController {
     }
   }
 
-  // Create gallery item with image upload (for multipart/form-data)
+  // Create gallery item(s) with image upload (supports single & multi upload)
   static async createGalleryWithImage(req, res) {
     try {
-      const { caption, sub_caption } = req.body;
-      
-      if (!req.file) {
+      const files = req.files;
+
+      if (!files || files.length === 0) {
         return res.status(400).json({
           success: false,
-          message: 'No image file provided'
+          message: 'No image file(s) provided'
         });
       }
 
-      const imageUrl = `${process.env.APP_URI || ''}/gallery/${req.file.filename}`;
-      
-      const galleryData = {
-        image: imageUrl,
-        caption: caption || '',
-        sub_caption: sub_caption || ''
-      };
+      // caption[] and sub_caption[] come as arrays from the form
+      const captions = Array.isArray(req.body.caption)
+        ? req.body.caption
+        : [req.body.caption || ''];
+      const subCaptions = Array.isArray(req.body.sub_caption)
+        ? req.body.sub_caption
+        : [req.body.sub_caption || ''];
 
-      const galleryId = await Gallery.create(galleryData);
-      const newGallery = await Gallery.getById(galleryId);
+      const items = files.map((file, index) => ({
+        image: GalleryController.buildGalleryImageUrl(req, file.filename),
+        caption: captions[index] || '',
+        sub_caption: subCaptions[index] || null
+      }));
 
-      // If it's a browser request (EJS), we might want to redirect
+      const insertedIds = await Gallery.bulkCreate(items);
+
+      // If it's a browser request (EJS), redirect
       if (req.headers.accept && req.headers.accept.includes('text/html')) {
         return res.redirect('/admin/gallery?success=true');
       }
 
+      // Fetch all newly created items for API response
+      const newItems = [];
+      for (const id of insertedIds) {
+        const item = await Gallery.getById(id);
+        if (item) newItems.push(item);
+      }
+
       res.status(201).json({
         success: true,
-        message: 'Gallery item created successfully',
-        data: newGallery
+        message: `${newItems.length} gallery item(s) created successfully`,
+        data: newItems
       });
     } catch (error) {
       console.error('Create gallery with image error:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to create gallery item',
+        message: 'Failed to create gallery item(s)',
         error: error.message
       });
     }
@@ -229,8 +273,8 @@ class GalleryController {
           message: 'No image file provided'
         });
       }
-      
-      const filename = `${process.env.APP_URI}/gallery/${req.file.filename}`;
+
+      const filename = GalleryController.buildGalleryImageUrl(req, req.file.filename);
       res.status(200).json({
         success: true,
         message: 'Image uploaded successfully',
@@ -251,10 +295,44 @@ class GalleryController {
     try {
       // Fetch all items (using a large limit to avoid pagination as requested)
       const result = await Gallery.getAll(1, 1000);
-      res.render('viewGallery.ejs', { galleryItems: result.gallery });
+      const galleryItems = (result.gallery || []).map((item) => ({
+        ...item,
+        image: GalleryController.normalizeGalleryImageUrl(item.image, req)
+      }));
+
+      res.render('viewGallery.ejs', { galleryItems });
     } catch (error) {
       console.error('Render gallery viewer error:', error);
       res.status(500).send('Internal Server Error');
+    }
+  }
+
+  // Bulk delete gallery items
+  static async bulkDeleteGallery(req, res) {
+    try {
+      const { ids } = req.body;
+
+      if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please provide an array of IDs to delete'
+        });
+      }
+
+      const affectedRows = await Gallery.bulkDelete(ids.map((id) => parseInt(id)));
+
+      res.status(200).json({
+        success: true,
+        message: `${affectedRows} gallery item(s) deleted successfully`,
+        deletedCount: affectedRows
+      });
+    } catch (error) {
+      console.error('Bulk delete gallery error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to delete gallery items',
+        error: error.message
+      });
     }
   }
 }

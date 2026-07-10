@@ -1,11 +1,9 @@
-const express = require('express')
-const router = express.Router()
-const multer = require('multer')
-const path = require('path')
+const express = require('express');
+const router = express.Router();
+const multer = require('multer');
+const path = require('path');
 const fs = require('fs');
-const {
-  glob,
-} = require('glob')
+const { glob } = require('glob');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -14,18 +12,16 @@ const storage = multer.diskStorage({
   filename: function (req, file, cb) {
     const ext = path.extname(file.originalname);
     const name = path.basename(file.originalname, ext);
-    const timestamp = new Date().toISOString().replace(/[-:.]/g, "");
+    const timestamp = new Date().toISOString().replace(/[-:.]/g, '');
     cb(null, `${name}_${timestamp}${ext}`);
   }
 });
 
-
 const upload = multer({ storage });
 
 router.post('/upload', upload.array('photos', 12), function (req, res, next) {
-  res.status(200).json({ msg: `file uploaded successfully!` })
-})
-
+  res.status(200).json({ msg: `file uploaded successfully!` });
+});
 
 // router.get('/get-images', async (req, res) => {
 //   const imgs = await glob(['**/gallery/*.{png,jpeg,jpg,PNG,JPG}'])
@@ -50,9 +46,7 @@ router.get('/get-images', async (req, res) => {
       return bTime - aTime;
     });
 
-    const imgPath = imgs.map((img) =>
-      img.replace(/\\/g, '/').replace('public', '')
-    );
+    const imgPath = imgs.map((img) => img.replace(/\\/g, '/').replace('public', ''));
 
     res.status(200).json({ imgPath });
   } catch (err) {
@@ -61,5 +55,4 @@ router.get('/get-images', async (req, res) => {
   }
 });
 
-
-module.exports = router
+module.exports = router;

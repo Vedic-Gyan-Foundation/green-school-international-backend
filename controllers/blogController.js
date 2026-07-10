@@ -120,7 +120,7 @@ class BlogController {
       // Handle cover image update
       if (req.file) {
         updateData.cover_image = `/uploads/${req.file.filename}`;
-        
+
         // Delete old image if exists and is a local file
         if (existingBlog.cover_image && existingBlog.cover_image.startsWith('/uploads/')) {
           const oldImagePath = path.join(__dirname, '..', existingBlog.cover_image);
@@ -237,11 +237,50 @@ class BlogController {
     }
   }
 
-
-  // Upload image 
+  // Upload image
   static async uploadBlogImage(req, res) {
-    const filename = req.file && `${process.env.APP_URI}/blogs/${req.file.filename}`
-    res.status(200).json({success: true, url: filename})
+    const filename = req.file && `${process.env.APP_URI}/blogs/${req.file.filename}`;
+    res.status(200).json({ success: true, url: filename });
+  }
+
+  // Bulk delete blogs
+  static async bulkDeleteBlogs(req, res) {
+    try {
+      const { ids } = req.body;
+
+      if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please provide an array of IDs to delete'
+        });
+      }
+
+      const affectedRows = await Blog.bulkDelete(ids.map((id) => parseInt(id)));
+
+      res.status(200).json({
+        success: true,
+        message: `${affectedRows} blog(s) deleted successfully`,
+        deletedCount: affectedRows
+      });
+    } catch (error) {
+      console.error('Bulk delete blogs error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to delete blogs',
+        error: error.message
+      });
+    }
+  }
+
+  // Render blog admin page
+  static async renderBlogAdmin(req, res) {
+    try {
+      const result = await Blog.getAll(1, 500);
+      res.render('viewBlogs.ejs', { blogs: result.blogs });
+    } catch (error) {
+      console.error('Render blog admin error:', error);
+      res.status(500).send('Internal Server Error');
+    }
   }
 }
 

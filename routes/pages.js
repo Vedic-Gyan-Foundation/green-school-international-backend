@@ -1,17 +1,20 @@
-const express = require('express')
-const pageRouter = express.Router()
-const admissionController = require('../controllers/admissionController')
+const express = require('express');
+const pageRouter = express.Router();
+const admissionController = require('../controllers/admissionController');
 
+pageRouter.get('/add-form', (req, res) => {
+  res.render('./galleryPage.ejs');
+});
 
-pageRouter.get('/add-form', (req, res)=> {
-  res.render('./galleryPage.ejs')
-})
+pageRouter.get('/add-blog', (req, res) => {
+  res.render('./blogPage.ejs');
+});
 
-pageRouter.get('/add-blog', (req, res)=> {
-  res.render('./blogPage.ejs')
-})
+pageRouter.get('/admin/blogs/add', (req, res) => {
+  res.render('./blogPage.ejs');
+});
 
-pageRouter.get('/admission-dashboard', admissionController.renderDashboard)
+pageRouter.get('/admission-dashboard', admissionController.renderDashboard);
 
 pageRouter.get('/admin/gallery/add', (req, res) => {
   res.render('addGalleryItem.ejs', { success: req.query.success === 'true' });
@@ -20,4 +23,11 @@ pageRouter.get('/admin/gallery/add', (req, res) => {
 const GalleryController = require('../controllers/galleryController');
 pageRouter.get('/admin/gallery', GalleryController.renderGalleryViewer);
 
-module.exports = pageRouter
+const BlogController = require('../controllers/blogController');
+pageRouter.get('/admin/blogs', BlogController.renderBlogAdmin);
+
+pageRouter.get('/admin', (req, res) => {
+  res.render('adminDashboard.ejs');
+});
+
+module.exports = pageRouter;

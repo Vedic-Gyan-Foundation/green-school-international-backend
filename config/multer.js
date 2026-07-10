@@ -23,7 +23,6 @@ if (!fs.existsSync(uploadDir)) {
 //   }
 // });
 
-
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, path.join(process.cwd(), 'public/blogs'));
@@ -31,7 +30,7 @@ const storage = multer.diskStorage({
   filename: function (req, file, cb) {
     const ext = path.extname(file.originalname);
     const name = path.basename(file.originalname, ext);
-    const timestamp = new Date().toISOString().replace(/[-:.]/g, "");
+    const timestamp = new Date().toISOString().replace(/[-:.]/g, '');
     cb(null, `${name}_${timestamp}${ext}`);
   }
 });

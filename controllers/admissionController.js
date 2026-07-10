@@ -7,7 +7,15 @@ const Admission = require('../models/Admission');
  */
 exports.submitAdmission = async (req, res) => {
   try {
-    const { childname, fathername, whatsappnumber, class: studentClass, email, address, query } = req.body;
+    const {
+      childname,
+      fathername,
+      whatsappnumber,
+      class: studentClass,
+      email,
+      address,
+      query
+    } = req.body;
     // console.log("🚀 ~ req.body:", req.body)
 
     // Basic validation
