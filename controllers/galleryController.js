@@ -3,6 +3,38 @@ const fs = require('fs');
 const path = require('path');
 
 class GalleryController {
+  static buildGalleryImageUrl(req, filename) {
+    const protocol = req.secure || req.protocol === 'https' ? 'https' : 'http';
+    const host = req.get('host');
+    return `${protocol}://${host}/gallery/${filename}`;
+  }
+
+  static normalizeGalleryImageUrl(image, req) {
+    if (!image) return '';
+
+    const protocol = req.secure || req.protocol === 'https' ? 'https' : 'http';
+    const host = req.get('host');
+    const currentBase = `${protocol}://${host}`;
+
+    if (/^https?:\/\//i.test(image)) {
+      try {
+        const parsedUrl = new URL(image);
+        if (parsedUrl.host === host) {
+          return image;
+        }
+        return `${currentBase}${parsedUrl.pathname || '/'}`;
+      } catch (error) {
+        return `${currentBase}/${image.replace(/^\/+/, '')}`;
+      }
+    }
+
+    if (image.startsWith('/')) {
+      return `${currentBase}${image}`;
+    }
+
+    return `${currentBase}/${image.replace(/^\/+/, '')}`;
+  }
+
   // Create a new gallery item
   static async createGallery(req, res) {
     try {
@@ -17,7 +49,7 @@ class GalleryController {
       }
 
       const galleryData = {
-        image,
+        image: GalleryController.normalizeGalleryImageUrl(image, req),
         caption: caption || '',
         sub_caption: sub_caption || null
       };
@@ -157,7 +189,7 @@ class GalleryController {
         : [req.body.sub_caption || ''];
 
       const items = files.map((file, index) => ({
-        image: `${process.env.APP_URI || ''}/gallery/${file.filename}`,
+        image: GalleryController.buildGalleryImageUrl(req, file.filename),
         caption: captions[index] || '',
         sub_caption: subCaptions[index] || null
       }));
@@ -242,7 +274,7 @@ class GalleryController {
         });
       }
 
-      const filename = `${process.env.APP_URI}/gallery/${req.file.filename}`;
+      const filename = GalleryController.buildGalleryImageUrl(req, req.file.filename);
       res.status(200).json({
         success: true,
         message: 'Image uploaded successfully',
@@ -263,7 +295,12 @@ class GalleryController {
     try {
       // Fetch all items (using a large limit to avoid pagination as requested)
       const result = await Gallery.getAll(1, 1000);
-      res.render('viewGallery.ejs', { galleryItems: result.gallery });
+      const galleryItems = (result.gallery || []).map((item) => ({
+        ...item,
+        image: GalleryController.normalizeGalleryImageUrl(item.image, req)
+      }));
+
+      res.render('viewGallery.ejs', { galleryItems });
     } catch (error) {
       console.error('Render gallery viewer error:', error);
       res.status(500).send('Internal Server Error');
