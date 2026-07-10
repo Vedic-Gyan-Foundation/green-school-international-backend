@@ -249,7 +249,7 @@
                             <td><input type="checkbox" class="item-checkbox" data-id="<%= blog.id %>" onchange="updateSelection()"></td>
                             <td>
                                 <% if (blog.cover_image) { %>
-                                    <img src="<%= blog.cover_image %>" alt="cover" onerror="this.src='https://via.placeholder.com/80x50?text=No+Image'">
+                                    <img src="<%= blog.cover_image %>" alt="cover">
                                 <% } else { %>
                                     <span style="color:#aaa;font-size:12px;">No image</span>
                                 <% } %>

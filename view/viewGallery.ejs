@@ -198,7 +198,7 @@
                     <div class="gallery-card" id="card-<%= item.id %>">
                         <div class="gallery-img-container" style="position:relative;">
                             <input type="checkbox" class="item-checkbox" data-id="<%= item.id %>" onchange="updateSelection()" style="position:absolute;top:10px;left:10px;width:20px;height:20px;z-index:10;cursor:pointer;">
-                            <img src="<%= item.image %>" alt="<%= item.caption %>" onerror="this.src='https://via.placeholder.com/400x300?text=Image+Not+Found'">
+                            <img src="<%= item.image %>" alt="<%= item.caption %>">
                         </div>
                         <div class="gallery-info">
                             <p class="gallery-caption" id="caption-<%= item.id %>"><%= item.caption || 'No caption' %></p>
