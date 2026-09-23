@@ -239,8 +239,17 @@ class BlogController {
 
   // Upload image
   static async uploadBlogImage(req, res) {
-    const filename = req.file && `${process.env.APP_URI}/blogs/${req.file.filename}`;
-    res.status(200).json({ success: true, url: filename });
+    // Without this guard a request carrying no file still answered 200 with
+    // `success: true, url: undefined`, so the caller happily stored an empty cover image.
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No image was uploaded. Send a file in the "blog_image" field.'
+      });
+    }
+
+    const url = `${process.env.APP_URI}/blogs/${req.file.filename}`;
+    res.status(200).json({ success: true, url });
   }
 
   // Bulk delete blogs

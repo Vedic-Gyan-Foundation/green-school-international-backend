@@ -1,62 +1,373 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Blog Upload</title>
-    <link rel="stylesheet" href="/css/style.css" />
-  </head>
-  <body>
-    <div class="upload-section">
-      <h3>Upload Cover Image</h3>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Blog Post - The Green School International</title>
+    <style>
+        :root {
+            --primary-color: #3d405b;
+            --secondary-color: #81b29a;
+            --accent-color: #f2cc8f;
+            --bg-color: #f4f1de;
+            --text-color: #3d405b;
+            --danger-color: #e07a5f;
+            --muted: #8a8ba0;
+        }
 
-      <input type="file" id="fileInput" />
+        * { box-sizing: border-box; }
 
-      <button id="uploadBtn">Upload File</button>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
 
-      <div id="result" style="margin-top: 15px; display: none">
-        <p>File uploaded!</p>
-        <input id="fileUrl" type="text" readonly />
-        <button id="copyBtn">Copy URL</button>
-      </div>
-    </div>
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 880px;
+            margin-top: 20px;
+        }
 
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+        h1 { margin: 0; color: var(--primary-color); }
+        .back-link { color: var(--muted); text-decoration: none; font-size: 14px; }
+        .back-link:hover { color: var(--primary-color); }
+
+        .form-group { margin-bottom: 22px; }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--primary-color);
+        }
+
+        .hint { font-size: 13px; color: var(--muted); font-weight: 400; margin-top: 4px; }
+
+        input[type="text"], input[type="url"], textarea {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #d9d7cc;
+            border-radius: 6px;
+            font-size: 15px;
+            font-family: inherit;
+            background: #fff;
+            color: var(--text-color);
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(129, 178, 154, 0.18);
+        }
+
+        /* ---- cover image ---- */
+        .dropzone {
+            border: 2px dashed #d9d7cc;
+            border-radius: 8px;
+            padding: 26px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color .15s, background .15s;
+            background: #fcfbf6;
+        }
+        .dropzone:hover, .dropzone.dragover { border-color: var(--secondary-color); background: #f4f9f6; }
+        .dropzone p { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+        .dropzone strong { color: var(--primary-color); }
+        .dropzone input[type="file"] { display: none; }
+
+        .preview {
+            display: none;
+            margin-top: 14px;
+            align-items: center;
+            gap: 14px;
+            padding: 12px;
+            border: 1px solid #e4e2d7;
+            border-radius: 8px;
+            background: #fcfbf6;
+        }
+        .preview.show { display: flex; }
+        .preview img { width: 104px; height: 68px; object-fit: cover; border-radius: 5px; flex-shrink: 0; }
+        .preview-meta { flex: 1; min-width: 0; }
+        .preview-name { font-weight: 600; font-size: 14px; word-break: break-all; }
+        .preview-status { font-size: 13px; margin-top: 3px; }
+        .status-uploading { color: var(--muted); }
+        .status-done { color: var(--secondary-color); font-weight: 600; }
+        .status-failed { color: var(--danger-color); font-weight: 600; }
+        .preview-remove {
+            background: none; border: none; color: var(--danger-color);
+            font-size: 22px; cursor: pointer; line-height: 1; padding: 0 4px;
+        }
+
+        .url-toggle {
+            background: none; border: none; padding: 0; margin-top: 10px;
+            color: var(--muted); font-size: 13px; cursor: pointer; text-decoration: underline;
+        }
+        .url-toggle:hover { color: var(--primary-color); }
+        .url-manual { display: none; margin-top: 10px; }
+        .url-manual.show { display: block; }
+
+        button.submit {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        button.submit:hover:not(:disabled) { background-color: #6a9c84; }
+        button.submit:disabled { background-color: #c5cfc9; cursor: not-allowed; }
+
+        .banner { padding: 13px 15px; border-radius: 6px; margin-bottom: 22px; display: none; font-size: 15px; }
+        .banner.show { display: block; }
+        .banner.success { background: #e8f3ed; color: #2f6b4f; border: 1px solid var(--secondary-color); }
+        .banner.error { background: #fbeae5; color: #a4432a; border: 1px solid var(--danger-color); }
+    </style>
+</head>
+<body>
     <div class="container">
-      <h1>Upload Blog Post</h1>
+        <div class="topbar">
+            <h1>Add Blog Post</h1>
+            <a class="back-link" href="/admin/blogs">&larr; Back to blogs</a>
+        </div>
 
-      <form id="blogForm">
-        <label>Title</label>
-        <input type="text" id="title" placeholder="Enter title" required />
+        <div id="banner" class="banner"></div>
 
-        <label>Author</label>
-        <input type="text" id="author" placeholder="Enter author" required />
+        <form id="blogForm">
+            <!-- Cover image: picking a file uploads it immediately and keeps the
+                 returned URL in a hidden field, so there is nothing to copy or paste. -->
+            <div class="form-group">
+                <label for="fileInput">Cover Image</label>
+                <div class="dropzone" id="dropzone">
+                    <strong>Choose an image</strong> or drag one here
+                    <p>Uploads as soon as you pick it &mdash; JPG, PNG or WebP</p>
+                    <input type="file" id="fileInput" accept="image/*">
+                </div>
 
-        <label>Read Time</label>
-        <input
-          type="text"
-          id="read_time"
-          placeholder="e.g. 5 min read"
-          required
-        />
+                <div class="preview" id="preview">
+                    <img id="previewImg" alt="Cover preview">
+                    <div class="preview-meta">
+                        <div class="preview-name" id="previewName"></div>
+                        <div class="preview-status" id="previewStatus"></div>
+                    </div>
+                    <button type="button" class="preview-remove" id="removeImage" title="Remove">&times;</button>
+                </div>
 
-        <label>Cover Image (URL String)</label>
-        <input
-          type="text"
-          id="cover_image"
-          placeholder="/blogs/image.jpg"
-          required
-        />
+                <button type="button" class="url-toggle" id="urlToggle">Use an image URL instead</button>
+                <div class="url-manual" id="urlManual">
+                    <input type="url" id="manualUrl" placeholder="https://api.greenschoolguwahati.com/blogs/example.jpg">
+                    <div class="hint">Only needed to reuse an image that is already uploaded.</div>
+                </div>
 
-        <label>Content</label>
-        <textarea id="content"></textarea>
+                <input type="hidden" id="cover_image">
+            </div>
 
-        <button type="submit">Upload Blog</button>
-      </form>
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" id="title" placeholder="Enter the blog title" required>
+            </div>
 
-      <pre id="output"></pre>
+            <div class="form-group">
+                <label for="author">Author</label>
+                <input type="text" id="author" placeholder="Enter the author's name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="read_time">Read Time</label>
+                <input type="text" id="read_time" placeholder="e.g. 5 min read">
+                <div class="hint">Optional &mdash; defaults to &ldquo;5 min read&rdquo;.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="content">Content</label>
+                <textarea id="content"></textarea>
+            </div>
+
+            <button type="submit" class="submit" id="submitBtn">Publish Blog Post</button>
+        </form>
     </div>
 
     <script src="/tinymce/js/tinymce/tinymce.min.js"></script>
-    <script src="/js/script.js"></script>
-  </body>
+    <script>
+        tinymce.init({
+            selector: '#content',
+            height: 600,
+            plugins: [
+                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                'insertdatetime', 'media', 'table', 'help', 'wordcount'
+            ],
+            toolbar: 'undo redo | blocks | bold italic backcolor | ' +
+                'alignleft aligncenter alignright alignjustify | ' +
+                'bullist numlist outdent indent | removeformat | help',
+            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:16px }'
+        });
+
+        const $ = (id) => document.getElementById(id);
+        const banner = $('banner');
+        const coverImage = $('cover_image');
+        const submitBtn = $('submitBtn');
+        let uploading = false;
+
+        const showBanner = (kind, text) => {
+            banner.className = 'banner show ' + kind;
+            banner.textContent = text;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+        const hideBanner = () => { banner.className = 'banner'; };
+
+        const setStatus = (cls, text) => {
+            $('previewStatus').className = 'preview-status ' + cls;
+            $('previewStatus').textContent = text;
+        };
+
+        const clearImage = () => {
+            coverImage.value = '';
+            $('fileInput').value = '';
+            $('preview').classList.remove('show');
+            $('previewImg').removeAttribute('src');
+            uploading = false;
+            submitBtn.disabled = false;
+        };
+
+        // Upload the moment a file is chosen. The URL the server returns goes straight
+        // into the hidden field — the old page made you copy and paste it by hand.
+        const uploadFile = async (file) => {
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                showBanner('error', 'That file is not an image. Choose a JPG, PNG or WebP.');
+                return;
+            }
+
+            hideBanner();
+            $('previewImg').src = URL.createObjectURL(file);
+            $('previewName').textContent = file.name;
+            $('preview').classList.add('show');
+            setStatus('status-uploading', 'Uploading…');
+            uploading = true;
+            submitBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('blog_image', file);
+
+            try {
+                const res = await fetch('/v1/blog/image', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (!res.ok || !data.success || !data.url) {
+                    throw new Error(data.message || 'Upload failed');
+                }
+
+                coverImage.value = data.url;
+                setStatus('status-done', 'Uploaded ✓');
+            } catch (error) {
+                console.error('Cover image upload failed:', error);
+                setStatus('status-failed', 'Upload failed — remove it and try again');
+                coverImage.value = '';
+                showBanner('error', 'Cover image upload failed: ' + error.message);
+            } finally {
+                uploading = false;
+                submitBtn.disabled = false;
+            }
+        };
+
+        $('fileInput').addEventListener('change', (e) => uploadFile(e.target.files[0]));
+        $('dropzone').addEventListener('click', () => $('fileInput').click());
+        $('removeImage').addEventListener('click', clearImage);
+
+        ['dragenter', 'dragover'].forEach((evt) =>
+            $('dropzone').addEventListener(evt, (e) => {
+                e.preventDefault();
+                $('dropzone').classList.add('dragover');
+            })
+        );
+        ['dragleave', 'drop'].forEach((evt) =>
+            $('dropzone').addEventListener(evt, (e) => {
+                e.preventDefault();
+                $('dropzone').classList.remove('dragover');
+            })
+        );
+        $('dropzone').addEventListener('drop', (e) => uploadFile(e.dataTransfer.files[0]));
+
+        $('urlToggle').addEventListener('click', () => {
+            const box = $('urlManual');
+            box.classList.toggle('show');
+            $('urlToggle').textContent = box.classList.contains('show')
+                ? 'Upload a file instead'
+                : 'Use an image URL instead';
+        });
+
+        $('manualUrl').addEventListener('input', (e) => {
+            coverImage.value = e.target.value.trim();
+        });
+
+        $('blogForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideBanner();
+
+            if (uploading) {
+                showBanner('error', 'The cover image is still uploading. Give it a moment.');
+                return;
+            }
+
+            const content = tinymce.get('content').getContent();
+            if (!content.trim()) {
+                showBanner('error', 'The blog content cannot be empty.');
+                return;
+            }
+
+            const payload = {
+                title: $('title').value.trim(),
+                author: $('author').value.trim(),
+                read_time: $('read_time').value.trim(),
+                cover_image: coverImage.value,
+                content
+            };
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Publishing…';
+
+            try {
+                const res = await fetch('/v1/blog/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (!res.ok || !data.success) {
+                    throw new Error(data.message || 'Blog creation failed');
+                }
+
+                showBanner('success', 'Blog post published. Add another below, or go back to the blog list.');
+                $('blogForm').reset();
+                tinymce.get('content').setContent('');
+                clearImage();
+                $('urlManual').classList.remove('show');
+                $('urlToggle').textContent = 'Use an image URL instead';
+            } catch (error) {
+                console.error('Blog creation failed:', error);
+                showBanner('error', 'Could not publish: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Publish Blog Post';
+            }
+        });
+    </script>
+</body>
 </html>
