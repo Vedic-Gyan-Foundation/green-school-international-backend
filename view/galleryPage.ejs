@@ -48,13 +48,47 @@
       input {
         padding: 1rem;
       }
+
+      .upload-status {
+        margin-top: 14px;
+        min-height: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 14px;
+        text-align: center;
+      }
+
+      .upload-status.error {
+        color: #b3391f;
+      }
+
+      .upload-status.ok {
+        color: #2f7a55;
+      }
+
+      button:disabled {
+        background-color: #9a9cb0;
+        cursor: not-allowed;
+      }
     </style>
+    <%- include('partials/adminHead') %>
   </head>
   <body>
+    <%- include('partials/adminBar') %>
     
     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
         <h2>Add Images in Gallery</h2>
-      <form action="/api/upload" method="POST" enctype="multipart/form-data">
+      <!-- Submitted with fetch() and FormData rather than as a native form post, and that is a
+           correctness requirement rather than a style choice.
+
+           CSRF protection runs as ordinary middleware, ahead of the route. multer — which is what
+           parses a multipart body — runs INSIDE the route. So for a native multipart submission
+           req.body is still empty when the token is looked for, the `_csrf` field cannot be read,
+           and a signed-in operator gets a flat 403 on every upload. A header is readable before
+           any body is parsed, and the wrapper in partials/adminHead.ejs puts the token in
+           x-csrf-token on every same-origin fetch, so this form goes through that path instead.
+
+           Do not convert this back to a plain <form> submit. -->
+      <form id="uploadForm" action="/api/upload" method="POST" enctype="multipart/form-data">
         <div>
           <label for="photos"></label>
           <input
@@ -66,11 +100,73 @@
           />
         </div>
         <div>
-            <button>
+            <button type="submit" id="uploadBtn">
                 <span>Submit</span>
             </button>
         </div>
       </form>
+      <div class="upload-status" id="uploadStatus" role="status" aria-live="polite"></div>
     </div>
+
+    <script>
+      (function () {
+        var form = document.getElementById('uploadForm');
+        var input = document.getElementById('photos');
+        var button = document.getElementById('uploadBtn');
+        var status = document.getElementById('uploadStatus');
+
+        function say(text, kind) {
+          status.textContent = text;
+          status.className = 'upload-status' + (kind ? ' ' + kind : '');
+        }
+
+        form.addEventListener('submit', function (event) {
+          event.preventDefault();
+
+          if (!input.files || input.files.length === 0) {
+            say('Choose at least one image first.', 'error');
+            return;
+          }
+
+          var data = new FormData();
+          // The route is upload.array('photos', 12), so every file goes under the same name.
+          Array.prototype.forEach.call(input.files, function (file) {
+            data.append('photos', file);
+          });
+
+          button.disabled = true;
+          say('Uploading ' + input.files.length + ' image(s)...', null);
+
+          // No Content-Type is set by hand: the browser has to write the multipart boundary
+          // itself, and naming the type would replace it with one that has no boundary at all.
+          fetch('/api/upload', { method: 'POST', body: data })
+            .then(function (response) {
+              return response
+                .json()
+                .catch(function () {
+                  return {};
+                })
+                .then(function (payload) {
+                  if (!response.ok) {
+                    throw new Error(
+                      payload.message || payload.msg || 'Upload failed (' + response.status + ').'
+                    );
+                  }
+                  return payload;
+                });
+            })
+            .then(function () {
+              form.reset();
+              say('Uploaded. Choose more images to add another batch.', 'ok');
+            })
+            .catch(function (error) {
+              say(error.message || 'Upload failed.', 'error');
+            })
+            .then(function () {
+              button.disabled = false;
+            });
+        });
+      })();
+    </script>
   </body>
 </html>

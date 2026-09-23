@@ -209,8 +209,10 @@
             cursor: not-allowed;
         }
     </style>
+    <%- include('partials/adminHead') %>
 </head>
 <body>
+    <%- include('partials/adminBar') %>
     <div class="container">
         <h1>Add Gallery Items</h1>
 
@@ -220,6 +222,14 @@
             </div>
         <% } %>
 
+        <!-- Submitted with fetch() and FormData, not as a native form post. CSRF protection is
+             middleware and runs BEFORE the route; multer, which parses a multipart body, runs
+             inside it. So on a native multipart submission req.body is empty when the token is
+             looked for, the `_csrf` field cannot be read, and every upload comes back 403 for a
+             signed-in operator. The x-csrf-token header is readable with no body parsing at all,
+             and partials/adminHead.ejs adds it to every same-origin fetch.
+
+             Do not convert this back to a plain <form> submit. -->
         <form id="galleryForm" action="/v1/gallery/add" method="POST" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="gallery_image">Select Image(s)</label>
@@ -319,22 +329,59 @@
 
         // A caption is only required for rows that actually have a file behind them.
         document.getElementById('galleryForm').addEventListener('submit', (e) => {
+            // Always prevented: this form is sent by fetch below, for the CSRF reason written
+            // above the <form> tag.
+            e.preventDefault();
+
             const files = Array.from(fileInput.files);
             if (files.length === 0) {
-                e.preventDefault();
                 fileCount.textContent = 'Choose at least one image first.';
                 return;
             }
-            const missing = Array.from(previewArea.querySelectorAll('.preview-item'))
-                .slice(0, files.length)
-                .some((row) => !row.querySelector('input[name="caption"]').value.trim());
+            const rows = Array.from(previewArea.querySelectorAll('.preview-item')).slice(0, files.length);
+            const missing = rows.some((row) => !row.querySelector('input[name="caption"]').value.trim());
             if (missing) {
-                e.preventDefault();
                 alert('Give every selected image a title/caption.');
                 return;
             }
+
+            // Field order matters to the controller: it zips captions[i] to files[i], so the
+            // captions are appended in the same order the files are.
+            const data = new FormData();
+            files.forEach((file) => data.append('gallery_image', file));
+            rows.forEach((row) => {
+                data.append('caption', row.querySelector('input[name="caption"]').value);
+                data.append('sub_caption', row.querySelector('input[name="sub_caption"]').value || '');
+            });
+
             submitBtn.disabled = true;
             submitBtn.textContent = 'Uploading...';
+
+            // Content-Type is left unset on purpose so the browser writes its own multipart
+            // boundary; naming the type here would send one with no boundary in it.
+            fetch('/v1/gallery/add', { method: 'POST', body: data })
+                .then((response) =>
+                    response
+                        .json()
+                        .catch(() => ({}))
+                        .then((payload) => {
+                            if (!response.ok) {
+                                throw new Error(payload.message || 'Upload failed (' + response.status + ').');
+                            }
+                            return payload;
+                        })
+                )
+                .then(() => {
+                    // Same destination the server used to redirect browsers to, so the green
+                    // "added successfully" banner and the ability to add another batch both
+                    // behave exactly as before.
+                    window.location.assign('/admin/gallery/add?success=true');
+                })
+                .catch((error) => {
+                    alert(error.message || 'Upload failed.');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Upload & Create';
+                });
         });
 
         render();

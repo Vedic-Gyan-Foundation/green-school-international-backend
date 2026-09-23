@@ -1,0 +1,172 @@
+<%
+    // The token is put on the page by the session middleware as res.locals.csrfToken.
+    //
+    // It is read through `locals` instead of as a bare `csrfToken` identifier on purpose. A bare
+    // identifier that was never set throws a ReferenceError, which turns every admin page into a
+    // 500 the moment one route is wired up without the middleware. An empty token instead leaves
+    // the panels readable and makes the script below shout in the console. `locals.success` is
+    // already used this way in addGalleryItem.ejs and addVideoItem.ejs.
+    var gsiCsrfToken = (locals && locals.csrfToken) || '';
+%>
+<meta name="csrf-token" content="<%= gsiCsrfToken %>">
+<script>
+    // Every write from an admin page has to carry the CSRF token, and there are dozens of fetch()
+    // call sites spread across the gallery, blog, video and document panels. Editing each one by
+    // hand would mean one silently-403ing button for every call site that got missed, so
+    // window.fetch is wrapped once, here, and every panel inherits it.
+    //
+    // Nothing is interpolated into this script. The token is read back out of the meta tag above,
+    // so no server value is ever spliced into a JavaScript string literal.
+    (function () {
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        var token = meta ? meta.getAttribute('content') : '';
+
+        if (!token) {
+            // Loud on purpose. Without a token every save, upload and delete on this page comes
+            // back 403, and a silent 403 is the exact failure this wrapper exists to prevent.
+            console.error(
+                '[admin] No CSRF token on this page. Saves, uploads and deletes will be rejected. ' +
+                    'The route that rendered this page is not setting res.locals.csrfToken.'
+            );
+        }
+
+        // The methods that carry no token, matching the safe-method set CSRF protection ignores.
+        var SAFE_METHODS = { GET: 1, HEAD: 1, OPTIONS: 1, TRACE: 1 };
+
+        function isSameOrigin(url) {
+            try {
+                return new URL(url, window.location.href).origin === window.location.origin;
+            } catch (e) {
+                // An address that will not even parse is not one this session's token should
+                // travel to. Fail closed.
+                return false;
+            }
+        }
+
+        // A session that expires mid-visit would otherwise surface as "Unexpected token < in JSON"
+        // or a bare "Failed to fetch" in a dozen different panels, because the panels would be
+        // parsing a rendered login page as JSON. Send the operator to the login page instead, and
+        // carry the page they were on so they land back on it.
+        function handleUnauthorized() {
+            if (window.location.pathname === '/admin/login') return;
+
+            window.location.assign(
+                '/admin/login?next=' +
+                    encodeURIComponent(window.location.pathname + window.location.search)
+            );
+        }
+
+        /* ---------------------------------------------------------------- fetch */
+
+        var nativeFetch = window.fetch;
+
+        if (typeof nativeFetch === 'function' && !nativeFetch.gsiCsrfWrapped) {
+            var wrappedFetch = function (input, init) {
+                var isRequest = typeof Request !== 'undefined' && input instanceof Request;
+                var url = isRequest ? input.url : String(input);
+
+                // Cross-origin calls are handed straight through, untouched. This token
+                // authenticates a request to THIS origin; attaching it to somebody else's host
+                // would hand them a working CSRF token.
+                if (!isSameOrigin(url)) {
+                    return nativeFetch.call(window, input, init);
+                }
+
+                var method = String(
+                    (init && init.method) || (isRequest && input.method) || 'GET'
+                ).toUpperCase();
+                var call;
+
+                if (isRequest) {
+                    // Request-object callers. The Request is rebuilt from itself so body, mode,
+                    // signal, redirect and the rest survive, with only the headers replaced.
+                    var request = init ? new Request(input, init) : input;
+                    var requestHeaders = new Headers(request.headers);
+
+                    if (!SAFE_METHODS[method] && token && !requestHeaders.has('x-csrf-token')) {
+                        requestHeaders.set('x-csrf-token', token);
+                    }
+
+                    call = nativeFetch.call(window, new Request(request, { headers: requestHeaders }));
+                } else {
+                    // (url, init) callers, which is every call site in these panels today.
+                    var nextInit = {};
+                    var key;
+
+                    if (init) {
+                        for (key in init) {
+                            if (Object.prototype.hasOwnProperty.call(init, key)) {
+                                nextInit[key] = init[key];
+                            }
+                        }
+                    }
+
+                    var headers = new Headers((init && init.headers) || {});
+
+                    // A header the caller set deliberately is never clobbered.
+                    if (!SAFE_METHODS[method] && token && !headers.has('x-csrf-token')) {
+                        headers.set('x-csrf-token', token);
+                    }
+
+                    nextInit.headers = headers;
+
+                    // These panels predate the session cookie and most of their calls never asked
+                    // for credentials. Defaulting to same-origin is what keeps them working after
+                    // login is switched on; a caller that chose its own value is left alone.
+                    if (!nextInit.credentials) {
+                        nextInit.credentials = 'same-origin';
+                    }
+
+                    call = nativeFetch.call(window, input, nextInit);
+                }
+
+                return call.then(function (response) {
+                    if (response.status === 401) {
+                        handleUnauthorized();
+                    }
+
+                    return response;
+                });
+            };
+
+            // Marked so that a page including this partial twice does not wrap the wrapper.
+            wrappedFetch.gsiCsrfWrapped = true;
+            window.fetch = wrappedFetch;
+        }
+
+        /* ------------------------------------------------------ native form posts */
+
+        // A form cannot set a header, so for a native form post the token rides along as a field
+        // instead, which middleware/auth.js reads from req.body._csrf.
+        //
+        // This covers urlencoded forms only, and that is the whole reason no admin page submits a
+        // MULTIPART form natively any more. CSRF protection is middleware and runs before the
+        // route; multer, which parses a multipart body, runs inside it. On a multipart submission
+        // req.body is therefore still empty when the token is looked for, this field is invisible,
+        // and the upload comes back 403. The two pages that used to do it — /add-form and
+        // /admin/gallery/add — now send FormData through the wrapped fetch above, where the token
+        // travels in a header that needs no body parsing. Do not add a new native multipart form.
+        //
+        // Listening on document in the capture phase means this runs before any page's own submit
+        // handler, including one that calls preventDefault().
+        document.addEventListener(
+            'submit',
+            function (event) {
+                var form = event.target;
+
+                if (!form || form.tagName !== 'FORM') return;
+                if (SAFE_METHODS[String(form.getAttribute('method') || 'GET').toUpperCase()]) return;
+                if (!isSameOrigin(form.getAttribute('action') || window.location.href)) return;
+                if (!token) return;
+                if (form.querySelector('input[name="_csrf"]')) return;
+
+                var field = document.createElement('input');
+                field.type = 'hidden';
+                field.name = '_csrf';
+                field.value = token;
+                form.insertBefore(field, form.firstChild);
+            },
+            true
+        );
+    })();
+</script>

@@ -1,0 +1,132 @@
+<%
+    // Set by the session middleware from req.session, which holds { userId, username, displayName,
+    // loginAt } and nothing else. Read through `locals` for the same reason as the CSRF token in
+    // adminHead.ejs: a local that has not been set should not turn a working panel into a 500.
+    var gsiUser = (locals && locals.currentUser) || null;
+    var gsiUserName = (gsiUser && (gsiUser.displayName || gsiUser.username)) || '';
+    var gsiCsrfToken = (locals && locals.csrfToken) || '';
+%>
+<style>
+    /* These styles sit in the body, after each page's own <style> block, and that is deliberate:
+       the body rule below has to beat the `body { padding: 20px }` those pages already declare,
+       and between two rules of equal specificity the later one wins. */
+
+    /* The bar is fixed rather than in normal flow because eight of these pages make <body> a flex
+       container. A bar in the flow would become a flex item and sit BESIDE the page instead of
+       above it. Fixed takes it out of flow entirely, so it behaves identically on all thirteen
+       pages, and the room it needs is made with body padding instead. */
+    body {
+        padding-top: 60px;
+    }
+
+    .gsi-adminbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        /* Below the panels' own modals, which sit at 1000 in viewBlogs.ejs and viewGallery.ejs.
+           A modal overlay has to cover this bar, not appear underneath it. */
+        z-index: 900;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        height: 44px;
+        padding: 0 18px;
+        box-sizing: border-box;
+        background: #3d405b;
+        border-bottom: 3px solid #81b29a;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Spelled out for the bar AND its children: admissionDashboard.ejs resets every element with
+       a `*` rule, and `*` applies to each child directly rather than letting it inherit from the
+       bar, so declaring the font on .gsi-adminbar alone would not reach the button or the name. */
+    .gsi-adminbar,
+    .gsi-adminbar * {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 13px;
+        line-height: 1.2;
+    }
+
+    .gsi-adminbar__home {
+        color: #ffffff;
+        font-weight: 600;
+        text-decoration: none;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .gsi-adminbar__home em {
+        color: #f2cc8f;
+        font-style: normal;
+    }
+
+    .gsi-adminbar__home:hover {
+        text-decoration: underline;
+    }
+
+    .gsi-adminbar__right {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .gsi-adminbar__who {
+        color: rgba(255, 255, 255, 0.72);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 40vw;
+    }
+
+    .gsi-adminbar__who strong {
+        color: #ffffff;
+        font-weight: 600;
+    }
+
+    .gsi-adminbar__form {
+        margin: 0;
+        display: block;
+    }
+
+    .gsi-adminbar__logout {
+        padding: 5px 12px;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 4px;
+        background: transparent;
+        color: #ffffff;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s;
+    }
+
+    .gsi-adminbar__logout:hover {
+        background: rgba(255, 255, 255, 0.14);
+        border-color: #ffffff;
+    }
+
+    @media (max-width: 520px) {
+        /* On a phone the bar has room for the way out but not for the name. */
+        .gsi-adminbar__who {
+            display: none;
+        }
+    }
+</style>
+<div class="gsi-adminbar">
+    <a class="gsi-adminbar__home" href="/admin">The Green School <em>Admin</em></a>
+    <div class="gsi-adminbar__right">
+        <% if (gsiUserName) { %>
+            <span class="gsi-adminbar__who">Signed in as <strong><%= gsiUserName %></strong></span>
+        <% } %>
+        <!-- A real POST, not a link. A GET logout can be fired by any page that can get an <img>
+             or an <iframe> in front of this operator, which makes signing people out a trivial
+             cross-site prank; a POST carrying the session's own CSRF token cannot. -->
+        <form class="gsi-adminbar__form" method="POST" action="/admin/logout">
+            <input type="hidden" name="_csrf" value="<%= gsiCsrfToken %>">
+            <button type="submit" class="gsi-adminbar__logout">Log out</button>
+        </form>
+    </div>
+</div>

@@ -84,8 +84,10 @@
         color: #777;
       }
     </style>
+    <%- include('partials/adminHead') %>
   </head>
   <body>
+    <%- include('partials/adminBar') %>
     <div class="container">
       <h1>Admin Dashboard</h1>
       <p class="subtitle">
@@ -108,7 +110,7 @@
           <p>Manage blog posts, edit content, delete articles</p>
         </a>
 
-        <a href="/admission-dashboard" class="card">
+        <a href="/admin/admissions" class="card">
           <div class="card-icon">🎓</div>
           <h2>Admissions</h2>
           <p>View admission inquiries and student submissions</p>

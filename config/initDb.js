@@ -157,6 +157,39 @@ const initDatabase = async () => {
     await connection.query(createDocumentPlacementsTable);
     console.log('✅ Table "document_placements" created/verified');
 
+    // Create admin_users table — the accounts that can sign in to /admin.
+    //
+    // There is no self-service registration anywhere in the app on purpose: rows are created by
+    // a human running scripts/create-admin-user.js on the server. password_hash holds an
+    // argon2id PHC string (97 characters at the parameters the app uses), never a plaintext and
+    // never a reversible encryption of one.
+    //
+    // failed_attempts and locked_until implement the per-account half of the brute-force
+    // defence. The per-IP rate limiter is the other half; neither one alone is enough, because
+    // a rate limiter keyed on IP cannot stop a distributed guess and a per-account lock cannot
+    // stop someone spraying one password across many usernames.
+    const createAdminUsersTable = `
+      CREATE TABLE IF NOT EXISTS admin_users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(100) NOT NULL UNIQUE,
+        password_hash VARCHAR(255) NOT NULL,
+        display_name VARCHAR(150) NULL,
+        is_active BOOLEAN NOT NULL DEFAULT TRUE,
+        last_login_at TIMESTAMP NULL DEFAULT NULL,
+        failed_attempts INT NOT NULL DEFAULT 0,
+        locked_until TIMESTAMP NULL DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `;
+
+    await connection.query(createAdminUsersTable);
+    console.log('✅ Table "admin_users" created/verified');
+
+    // The `sessions` table is deliberately NOT created here. express-mysql-session owns its own
+    // schema and creates it at startup (createDatabaseTable: true in config/session.js);
+    // duplicating the DDL here would be a second definition to keep in step with the library.
+
     // Insert sample data
     const checkData = await connection.query('SELECT COUNT(*) as count FROM blogs');
     const count = checkData[0][0].count;

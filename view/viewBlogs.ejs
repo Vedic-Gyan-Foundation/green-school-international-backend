@@ -242,8 +242,10 @@
         .cover-status.done { color: var(--secondary-color); font-weight: 600; }
         .cover-status.failed { color: var(--danger-color); font-weight: 600; }
     </style>
+    <%- include('partials/adminHead') %>
 </head>
 <body>
+    <%- include('partials/adminBar') %>
     <div class="container">
         <a href="/admin" class="back-link">&larr; Back to Admin Dashboard</a>
         <header>

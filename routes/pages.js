@@ -1,38 +1,62 @@
 const express = require('express');
 const pageRouter = express.Router();
 const admissionController = require('../controllers/admissionController');
+const { requireAdmin } = require('../middleware/auth');
 
-pageRouter.get('/add-form', (req, res) => {
+// Deny by default for the three namespaces this file serves. Every route below ALSO names
+// requireAdmin, which is what a reviewer reads; these three lines are the net underneath, so a
+// page added later is protected from the moment it is written rather than from the moment
+// someone remembers. They are mounted on paths and not on the router, because this router is
+// mounted at '/' in app.js: a bare pageRouter.use(requireAdmin) would also intercept every
+// public /v1 request on its way past and take the whole public website down with it.
+//
+// /admin/login is not caught here. authRoutes is mounted above this router and answers it, so
+// nothing signed-out ever reaches these lines looking for the login page.
+pageRouter.use('/admin', requireAdmin);
+pageRouter.use('/add-form', requireAdmin);
+pageRouter.use('/add-blog', requireAdmin);
+pageRouter.use('/admission-dashboard', requireAdmin);
+
+pageRouter.get('/add-form', requireAdmin, (req, res) => {
   res.render('./galleryPage.ejs');
 });
 
-pageRouter.get('/add-blog', (req, res) => {
+pageRouter.get('/add-blog', requireAdmin, (req, res) => {
   res.render('./blogPage.ejs');
 });
 
-pageRouter.get('/admin/blogs/add', (req, res) => {
+pageRouter.get('/admin/blogs/add', requireAdmin, (req, res) => {
   res.render('./blogPage.ejs');
 });
 
-pageRouter.get('/admission-dashboard', admissionController.renderDashboard);
+// The admissions list is the most sensitive page in the panel - 170 children's names, their
+// parents' names, phone numbers and addresses - and it used to sit on its own path behind its
+// own nginx credential. It now lives with every other admin page, under the one login.
+pageRouter.get('/admin/admissions', requireAdmin, admissionController.renderDashboard);
 
-pageRouter.get('/admin/gallery/add', (req, res) => {
+// Staff and the client have had /admission-dashboard bookmarked for months. A permanent
+// redirect keeps those bookmarks working and teaches the browser the new address.
+pageRouter.get('/admission-dashboard', requireAdmin, (req, res) => {
+  res.redirect(301, '/admin/admissions');
+});
+
+pageRouter.get('/admin/gallery/add', requireAdmin, (req, res) => {
   res.render('addGalleryItem.ejs', { success: req.query.success === 'true' });
 });
 
 const GalleryController = require('../controllers/galleryController');
-pageRouter.get('/admin/gallery', GalleryController.renderGalleryViewer);
+pageRouter.get('/admin/gallery', requireAdmin, GalleryController.renderGalleryViewer);
 
 const BlogController = require('../controllers/blogController');
-pageRouter.get('/admin/blogs', BlogController.renderBlogAdmin);
-pageRouter.get('/admin/blogs/edit/:id', BlogController.renderEditBlog);
+pageRouter.get('/admin/blogs', requireAdmin, BlogController.renderBlogAdmin);
+pageRouter.get('/admin/blogs/edit/:id', requireAdmin, BlogController.renderEditBlog);
 
-pageRouter.get('/admin/videos/add', (req, res) => {
+pageRouter.get('/admin/videos/add', requireAdmin, (req, res) => {
   res.render('addVideoItem.ejs', { success: req.query.success === 'true' });
 });
 
 const VideoController = require('../controllers/videoController');
-pageRouter.get('/admin/videos', VideoController.renderVideoAdmin);
+pageRouter.get('/admin/videos', requireAdmin, VideoController.renderVideoAdmin);
 
 const Document = require('../models/Document');
 const DocumentPlacement = require('../models/DocumentPlacement');
@@ -168,7 +192,7 @@ function decoratePlacements(grouped) {
 // The document admin pages read the models directly: they need the rows exactly as the public
 // pages order them, so there is nothing for a controller to add. No admin GET lives under /v1,
 // where nginx authenticates only the non-GET methods.
-pageRouter.get('/admin/documents', async (req, res) => {
+pageRouter.get('/admin/documents', requireAdmin, async (req, res) => {
   try {
     // Unfiltered on purpose - the admin list has to show hidden placements too, marked as such.
     const grouped = (await DocumentPlacement.getAllGrouped()) || {};
@@ -181,7 +205,7 @@ pageRouter.get('/admin/documents', async (req, res) => {
   }
 });
 
-pageRouter.get('/admin/documents/add', async (req, res) => {
+pageRouter.get('/admin/documents/add', requireAdmin, async (req, res) => {
   try {
     // The list page links here with the block whose "+ Add" button was pressed.
     const requested = String(req.query.location || '').trim();
@@ -216,7 +240,7 @@ pageRouter.get('/admin/documents/add', async (req, res) => {
   }
 });
 
-pageRouter.get('/admin/documents/placement/:id', async (req, res) => {
+pageRouter.get('/admin/documents/placement/:id', requireAdmin, async (req, res) => {
   try {
     const grouped = (await DocumentPlacement.getAllGrouped()) || {};
     decoratePlacements(grouped);
@@ -246,11 +270,11 @@ pageRouter.get('/admin/documents/placement/:id', async (req, res) => {
 });
 
 // The disclosure admin page was live for part of today, so the client may have bookmarked it.
-pageRouter.get('/admin/disclosure', (req, res) => {
+pageRouter.get('/admin/disclosure', requireAdmin, (req, res) => {
   res.redirect(301, '/admin/documents');
 });
 
-pageRouter.get('/admin', (req, res) => {
+pageRouter.get('/admin', requireAdmin, (req, res) => {
   res.render('adminDashboard.ejs');
 });
 

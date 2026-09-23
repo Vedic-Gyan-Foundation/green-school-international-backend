@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Sign In | The Green School International</title>
+    <!-- Nothing on this page should ever be indexed or previewed in a search result. -->
+    <meta name="robots" content="noindex, nofollow">
+    <style>
+        :root {
+            --primary-color: #3d405b;
+            --secondary-color: #81b29a;
+            --accent-color: #f2cc8f;
+            --bg-color: #f4f1de;
+            --text-color: #3d405b;
+            --danger-color: #e07a5f;
+            --muted: #8a8ba0;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 400px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            padding: 36px 34px 28px;
+        }
+
+        .brand {
+            margin: 0 0 6px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--secondary-color);
+        }
+
+        h1 {
+            margin: 0 0 26px;
+            text-align: center;
+            font-size: 22px;
+            color: var(--primary-color);
+        }
+
+        /* Whatever the controller passed, rendered as it stands. There are deliberately no
+           per-field errors: telling someone their username was right but their password was not
+           is how an attacker confirms which accounts exist. */
+        .alert {
+            margin: 0 0 22px;
+            padding: 12px 14px;
+            border-left: 4px solid var(--danger-color);
+            border-radius: 6px;
+            background: #fdeceb;
+            color: #8c3b28;
+            font-size: 14px;
+            line-height: 1.45;
+        }
+
+        .field { margin-bottom: 18px; }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #ddd9c9;
+            border-radius: 6px;
+            background: #fdfcf7;
+            color: var(--text-color);
+            font-family: inherit;
+            font-size: 15px;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(129, 178, 154, 0.25);
+        }
+
+        .btn-submit {
+            width: 100%;
+            margin-top: 6px;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            background: var(--primary-color);
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s, opacity 0.2s;
+        }
+
+        .btn-submit:hover:not(:disabled) { background: #2a2c3e; }
+
+        .btn-submit:disabled {
+            opacity: 0.65;
+            cursor: progress;
+        }
+
+        .hint {
+            margin: 22px 0 0;
+            text-align: center;
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <p class="brand">The Green School International</p>
+        <h1>Admin sign in</h1>
+
+        <% if (locals.error) { %>
+            <div class="alert" role="alert"><%= error %></div>
+        <% } %>
+
+        <form id="loginForm" method="POST" action="/admin/login">
+            <!-- The CSRF token travels as a form field because a plain form post cannot set a
+                 header. Read through `locals` so a route that forgets to pass it renders a login
+                 page that says so, rather than a 500 with no way back in. -->
+            <input type="hidden" name="_csrf" value="<%= locals.csrfToken || '' %>">
+
+            <!-- Where to land after signing in. The controller is what validates this; it must be
+                 a local path so this field cannot be used to bounce someone to a phishing page. -->
+            <input type="hidden" name="next" value="<%= locals.next || '' %>">
+
+            <div class="field">
+                <label for="username">Username</label>
+                <!-- autocomplete, autocapitalize and spellcheck are all here so a password manager
+                     recognises this as a sign-in form and a phone keyboard does not "helpfully"
+                     capitalise the first letter of a username. -->
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    value="<%= locals.username || '' %>"
+                    autocomplete="username"
+                    autocapitalize="none"
+                    autocorrect="off"
+                    spellcheck="false"
+                    autofocus
+                    required>
+            </div>
+
+            <div class="field">
+                <label for="password">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    autocomplete="current-password"
+                    required>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">Sign in</button>
+        </form>
+
+        <!-- No "forgot password" link: this application sends no email, so the link could only
+             lead somewhere dead, and a dead link on a login page reads as a broken site. -->
+        <p class="hint">
+            Lost the password? It can only be reset on the server &mdash; ask whoever looks after
+            the website.
+        </p>
+    </div>
+
+    <script>
+        (function () {
+            var form = document.getElementById('loginForm');
+            var button = document.getElementById('submitBtn');
+
+            form.addEventListener('submit', function () {
+                // Disabled on the next tick rather than immediately: some browsers abandon a
+                // submission if the submit button is disabled inside the handler itself. The
+                // submit event only fires once the browser's own `required` checks have passed,
+                // so an empty form never gets here and never leaves a dead button behind.
+                window.setTimeout(function () {
+                    button.disabled = true;
+                    button.textContent = 'Signing in…';
+                }, 0);
+            });
+
+            // Coming back with the browser's Back button can restore this page from the cache
+            // exactly as it was left - mid-submit, with the button still disabled. Put it back.
+            window.addEventListener('pageshow', function (event) {
+                if (event.persisted) {
+                    button.disabled = false;
+                    button.textContent = 'Sign in';
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
