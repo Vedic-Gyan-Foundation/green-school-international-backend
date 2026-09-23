@@ -94,6 +94,27 @@ const initDatabase = async () => {
     await connection.query(createVideosTable);
     console.log('✅ Table "videos" created/verified');
 
+    // Create disclosure_documents table
+    const createDisclosureDocumentsTable = `
+      CREATE TABLE IF NOT EXISTS disclosure_documents (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        section CHAR(1) NOT NULL,
+        title VARCHAR(500) NOT NULL,
+        file_url VARCHAR(500) NOT NULL,
+        link_label VARCHAR(100) NOT NULL DEFAULT 'Click to Download',
+        link_type ENUM('download','view') NOT NULL DEFAULT 'download',
+        is_numbered BOOLEAN NOT NULL DEFAULT TRUE,
+        display_order INT NOT NULL DEFAULT 0,
+        is_visible BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_section_order (section, display_order)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `;
+
+    await connection.query(createDisclosureDocumentsTable);
+    console.log('✅ Table "disclosure_documents" created/verified');
+
     // Insert sample data
     const checkData = await connection.query('SELECT COUNT(*) as count FROM blogs');
     const count = checkData[0][0].count;

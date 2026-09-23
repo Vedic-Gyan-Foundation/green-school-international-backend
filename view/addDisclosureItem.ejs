@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Disclosure Row - The Green School International</title>
+    <style>
+        :root {
+            --primary-color: #3d405b;
+            --secondary-color: #81b29a;
+            --accent-color: #f2cc8f;
+            --bg-color: #f4f1de;
+            --text-color: #3d405b;
+            --danger-color: #e07a5f;
+            --muted: #8a8ba0;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 700px;
+            margin-top: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+        }
+
+        .lede {
+            text-align: center;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 0 0 30px;
+        }
+
+        .form-group { margin-bottom: 22px; }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        select,
+        textarea,
+        input[type="text"],
+        input[type="url"],
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 15px;
+            font-family: inherit;
+            background: #fff;
+            color: var(--text-color);
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        select:focus, textarea:focus, input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        .hint {
+            font-size: 13px;
+            color: var(--muted);
+            font-weight: 400;
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        .file-chosen {
+            font-size: 13px;
+            color: var(--secondary-color);
+            font-weight: 600;
+            margin-top: 6px;
+            min-height: 18px;
+        }
+
+        button, .btn {
+            padding: 12px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover, .btn:hover { background-color: #2a2c3e; }
+
+        .btn-submit { width: 100%; }
+
+        .btn-submit:disabled {
+            background-color: #c5cfc9;
+            cursor: not-allowed;
+        }
+
+        .advanced {
+            border: 1px solid #e4e2d7;
+            border-radius: 6px;
+            padding: 0 16px;
+            margin-bottom: 22px;
+            background: #fcfbf6;
+        }
+
+        .advanced summary {
+            cursor: pointer;
+            padding: 14px 0;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--primary-color);
+        }
+
+        .advanced[open] summary { border-bottom: 1px solid #e4e2d7; }
+
+        .advanced .advanced-body { padding: 18px 0 4px; }
+
+        .radio-row {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 10px;
+        }
+
+        .radio-row input { width: auto; }
+        .radio-row label { margin: 0; font-weight: 400; }
+
+        .checkbox-row { display: flex; align-items: center; gap: 9px; }
+        .checkbox-row input { width: 18px; height: 18px; }
+        .checkbox-row label { margin: 0; font-weight: 400; }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            display: none;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .alert.show { display: block; }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #fbeae5;
+            color: #a4432a;
+            border: 1px solid var(--danger-color);
+        }
+
+        .alert a { color: inherit; font-weight: 600; }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover { text-decoration: underline; }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Add a Disclosure Row</h1>
+        <p class="lede">
+            This adds one more numbered row to the bottom of the section you choose on
+            <a href="https://greenschoolguwahati.com/publicdisclosure" target="_blank" rel="noopener noreferrer">the public disclosure page</a>.
+        </p>
+
+        <div class="alert alert-success" id="successBox"></div>
+        <div class="alert alert-error" id="errorBox"></div>
+
+        <form id="disclosureForm">
+            <div class="form-group">
+                <label for="section">Which section does this row belong to?</label>
+                <select id="section" name="section">
+                    <option value="B" <%= locals.section === 'B' ? 'selected' : '' %>>B &mdash; Documents and Information</option>
+                    <option value="C" <%= locals.section === 'C' ? 'selected' : '' %>>C &mdash; Result and Academics</option>
+                    <% if (locals.section !== 'B' && locals.section !== 'C') { %>
+                        <option value="<%= locals.section %>" selected><%= locals.section %></option>
+                    <% } %>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="title">Documents / Information</label>
+                <textarea id="title" name="title" placeholder="e.g. Copy of valid fire safety certificate issued by the competent authority" required></textarea>
+                <div class="hint">The wording that appears in the middle column of the table, exactly as a visitor reads it.</div>
+            </div>
+
+            <div class="form-group" id="fileGroup">
+                <label for="document">The document itself</label>
+                <input type="file" id="document" name="document" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx">
+                <div class="file-chosen" id="fileChosen"></div>
+                <div class="hint">PDF, image or Word file, up to 20 MB. It uploads when you save &mdash; there is no URL to copy anywhere.</div>
+            </div>
+
+            <div class="form-group hidden" id="urlGroup">
+                <label for="file_url">Link address</label>
+                <input type="url" id="file_url" name="file_url" placeholder="https://youtu.be/...">
+                <div class="hint">Used for rows that point somewhere else on the internet, such as the inspection video.</div>
+            </div>
+
+            <details class="advanced">
+                <summary>Link style (only change this for a link that is not a document)</summary>
+                <div class="advanced-body">
+                    <div class="radio-row">
+                        <input type="radio" id="styleDownload" name="link_type" value="download" checked>
+                        <label for="styleDownload">Download file &mdash; a document a visitor saves</label>
+                    </div>
+                    <div class="radio-row">
+                        <input type="radio" id="styleView" name="link_type" value="view">
+                        <label for="styleView">External link &mdash; opens a web page in a new tab</label>
+                    </div>
+
+                    <div class="form-group" style="margin-top:18px;">
+                        <label for="link_label">Wording of the link</label>
+                        <input type="text" id="link_label" name="link_label" value="Click to Download">
+                        <div class="hint">What the blue link text says. Leave it as it is to match every other row.</div>
+                    </div>
+
+                    <div class="form-group checkbox-row" style="margin-bottom:0;">
+                        <input type="checkbox" id="is_numbered" checked>
+                        <label for="is_numbered">Give this row an SL number in the main table</label>
+                    </div>
+                    <div class="hint">
+                        Unticked, the row sits in the small table underneath without a number &mdash; that is
+                        where the inspection video link lives.
+                    </div>
+                </div>
+            </details>
+
+            <button type="submit" class="btn-submit" id="submitBtn">Add this row</button>
+        </form>
+
+        <a href="/admin/disclosure" class="back-link">&larr; Back to Public Disclosure</a>
+    </div>
+
+    <script>
+        const form = document.getElementById('disclosureForm');
+        const fileInput = document.getElementById('document');
+        const urlInput = document.getElementById('file_url');
+        const submitBtn = document.getElementById('submitBtn');
+        const successBox = document.getElementById('successBox');
+        const errorBox = document.getElementById('errorBox');
+
+        const showError = (message) => {
+            successBox.className = 'alert alert-success';
+            errorBox.className = 'alert alert-error show';
+            errorBox.textContent = message;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        const isExternal = () => document.getElementById('styleView').checked;
+
+        // nginx refuses an upload over 20MB with its own HTML error page, which response.json()
+        // would surface as a syntax error nobody can act on.
+        const readJson = async (response) => {
+            try {
+                return await response.json();
+            } catch (error) {
+                if (response.status === 413) {
+                    throw new Error('That file is too large for the server. Keep it under 20 MB.');
+                }
+                throw new Error(`The server gave an unexpected reply (HTTP ${response.status}).`);
+            }
+        };
+
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            document.getElementById('fileChosen').textContent = file ? 'Chosen: ' + file.name : '';
+        });
+
+        // The two link styles need different inputs, so only the relevant one is on screen.
+        const applyLinkStyle = () => {
+            const external = isExternal();
+            document.getElementById('fileGroup').classList.toggle('hidden', external);
+            document.getElementById('urlGroup').classList.toggle('hidden', !external);
+            document.getElementById('link_label').value = external
+                ? 'Click to View'
+                : 'Click to Download';
+            // An external link is the unnumbered kind by default, the way the inspection video
+            // row is. Still a tick box, so a numbered external link stays possible.
+            document.getElementById('is_numbered').checked = !external;
+        };
+
+        document.querySelectorAll('input[name="link_type"]').forEach((radio) => {
+            radio.addEventListener('change', applyLinkStyle);
+        });
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            errorBox.className = 'alert alert-error';
+
+            const title = document.getElementById('title').value.trim();
+            if (!title) return showError('Write the wording for this row first.');
+
+            const external = isExternal();
+            if (external && !urlInput.value.trim()) {
+                return showError('Paste the link address for this row.');
+            }
+            if (!external && !fileInput.files[0]) {
+                return showError('Choose the document to upload for this row.');
+            }
+
+            const formData = new FormData();
+            formData.append('section', document.getElementById('section').value);
+            formData.append('title', title);
+            formData.append('link_type', external ? 'view' : 'download');
+            formData.append('link_label', document.getElementById('link_label').value.trim());
+            formData.append(
+                'is_numbered',
+                document.getElementById('is_numbered').checked ? 'true' : 'false'
+            );
+
+            if (external) {
+                formData.append('file_url', urlInput.value.trim());
+            } else {
+                formData.append('document', fileInput.files[0]);
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Adding...';
+
+            try {
+                const response = await fetch('/v1/disclosure/add', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin'
+                });
+                const result = await readJson(response);
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'Could not add the row');
+                }
+
+                successBox.className = 'alert alert-success show';
+                successBox.innerHTML =
+                    'Added. It is now the last row of that section on the website. ' +
+                    '<a href="/admin/disclosure">Back to the list</a> or add another below.';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                form.reset();
+                document.getElementById('fileChosen').textContent = '';
+                applyLinkStyle();
+            } catch (error) {
+                console.error('Add disclosure row error:', error);
+                showError('Could not add the row: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Add this row';
+            }
+        });
+    </script>
+</body>
+</html>
