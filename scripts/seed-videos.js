@@ -14,22 +14,40 @@ const path = require('path');
 const Video = require('../models/Video');
 const { pool } = require('../config/database');
 
-const DEFAULT_VIDEO_LINKS_PATH = path.join(
-  __dirname,
-  '..',
-  '..',
-  'the-green-school-international-frontend',
-  'src',
-  'pages',
-  'Gallery',
-  'videoLinks.json'
-);
+// The frontend sits beside this repo locally, but on the server it lives under a different
+// parent (greenschool-website/ vs greenschool-backend/). Try both rather than assuming one,
+// and fall back to the explicit argv path.
+const VIDEO_LINKS_CANDIDATES = [
+  // local checkout: both repos are siblings
+  path.join(__dirname, '..', '..', 'the-green-school-international-frontend'),
+  // server layout: /home/vedicuser/vedicfoundation/greenschool-website/<frontend>
+  path.join(
+    __dirname,
+    '..',
+    '..',
+    '..',
+    'greenschool-website',
+    'the-green-school-international-frontend'
+  )
+].map((base) => path.join(base, 'src', 'pages', 'Gallery', 'videoLinks.json'));
+
+const resolveVideoLinksPath = () => {
+  if (process.argv[2]) return path.resolve(process.argv[2]);
+  return (
+    VIDEO_LINKS_CANDIDATES.find((candidate) => fs.existsSync(candidate)) ||
+    VIDEO_LINKS_CANDIDATES[0]
+  );
+};
 
 const seedVideos = async () => {
-  const videoLinksPath = process.argv[2] ? path.resolve(process.argv[2]) : DEFAULT_VIDEO_LINKS_PATH;
+  const videoLinksPath = resolveVideoLinksPath();
 
   if (!fs.existsSync(videoLinksPath)) {
-    throw new Error(`videoLinks.json not found at ${videoLinksPath}`);
+    throw new Error(
+      `videoLinks.json not found at ${videoLinksPath}. Tried:\n  ` +
+        VIDEO_LINKS_CANDIDATES.join('\n  ') +
+        '\nPass an explicit path: node scripts/seed-videos.js <path/to/videoLinks.json>'
+    );
   }
 
   const entries = JSON.parse(fs.readFileSync(videoLinksPath, 'utf8'));

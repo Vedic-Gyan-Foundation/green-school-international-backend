@@ -54,7 +54,9 @@ class Video {
     const whereClause = onlyVisible ? 'WHERE is_visible = TRUE' : '';
 
     const query = `
-      SELECT id, url, title, published_at, is_visible, created_at, updated_at
+      SELECT id, url, title,
+             DATE_FORMAT(published_at, '%Y-%m-%d') AS published_at,
+             is_visible, created_at, updated_at
       FROM videos
       ${whereClause}
       ORDER BY published_at IS NULL, published_at DESC, created_at DESC
@@ -83,7 +85,10 @@ class Video {
   // Get video item by ID
   static async getById(id) {
     const query = `
-      SELECT * FROM videos WHERE id = ?
+      SELECT id, url, title,
+             DATE_FORMAT(published_at, '%Y-%m-%d') AS published_at,
+             is_visible, created_at, updated_at
+      FROM videos WHERE id = ?
     `;
 
     const [rows] = await promisePool.query(query, [id]);
