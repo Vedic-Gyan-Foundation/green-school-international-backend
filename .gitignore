@@ -8,3 +8,7 @@
 # Local working notes — not for publication
 CLAUDE.md
 docs/
+
+# Students' transfer certificates. Personal records of minors — these must never be
+# committed to a public repository again. They live on the server outside public/.
+public/transfer_certificates/
