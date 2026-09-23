@@ -217,6 +217,30 @@
         }
 
         .back-link:hover { text-decoration: underline; }
+
+        .optional { font-weight: 400; color: #8a8ba0; font-size: 13px; }
+        .field-hint { font-size: 12px; color: #8a8ba0; margin-top: 4px; }
+
+        .cover-editor { display: flex; gap: 14px; align-items: center; }
+        .cover-preview {
+            width: 132px;
+            height: 84px;
+            flex-shrink: 0;
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid #ddd;
+            background: #f4f1de;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cover-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .cover-empty { font-size: 12px; color: #9a998c; }
+        .cover-actions { display: flex; flex-direction: column; gap: 6px; }
+        .cover-status { font-size: 13px; }
+        .cover-status.uploading { color: #8a8ba0; }
+        .cover-status.done { color: var(--secondary-color); font-weight: 600; }
+        .cover-status.failed { color: var(--danger-color); font-weight: 600; }
     </style>
 </head>
 <body>
@@ -294,16 +318,27 @@
                     <input type="text" id="editAuthor" required>
                 </div>
                 <div class="form-group">
-                    <label for="editReadTime">Read Time</label>
+                    <label for="editReadTime">Read Time <span class="optional">(optional)</span></label>
                     <input type="text" id="editReadTime" placeholder="e.g. 5 min read">
+                    <div class="field-hint">Leave blank to hide it &mdash; new posts default to &ldquo;5 min read&rdquo;.</div>
                 </div>
                 <div class="form-group">
-                    <label for="editCoverImage">Cover Image URL</label>
-                    <input type="text" id="editCoverImage">
+                    <label>Cover Image</label>
+                    <div class="cover-editor">
+                        <div class="cover-preview" id="editCoverPreview">
+                            <span class="cover-empty">No cover image</span>
+                        </div>
+                        <div class="cover-actions">
+                            <button type="button" class="btn btn-edit btn-sm" id="editCoverBtn">Change image</button>
+                            <div class="cover-status" id="editCoverStatus"></div>
+                        </div>
+                    </div>
+                    <input type="file" id="editCoverFile" accept="image/*" style="display:none;">
+                    <input type="hidden" id="editCoverImage">
                 </div>
                 <div class="form-group">
                     <label for="editContent">Content</label>
-                    <textarea id="editContent" required></textarea>
+                    <textarea id="editContent"></textarea>
                 </div>
                 <div style="text-align: right;">
                     <button type="button" class="btn" onclick="closeModal()" style="background:#eee; color:#333; margin-right:10px;">Cancel</button>
@@ -313,7 +348,25 @@
         </div>
     </div>
 
+    <script src="/tinymce/js/tinymce/tinymce.min.js"></script>
     <script>
+        // The content column holds HTML. Editing it as raw markup in a textarea meant
+        // pasted text arrived as tags; TinyMCE shows it the way the add-blog page does.
+        tinymce.init({
+            selector: '#editContent',
+            height: 420,
+            menubar: false,
+            plugins: [
+                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                'insertdatetime', 'media', 'table', 'help', 'wordcount'
+            ],
+            toolbar: 'undo redo | blocks | bold italic backcolor | ' +
+                'alignleft aligncenter alignright alignjustify | ' +
+                'bullist numlist outdent indent | removeformat | code | help',
+            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:16px }'
+        });
+
         const modal = document.getElementById('editModal');
         const editForm = document.getElementById('editForm');
 
@@ -328,8 +381,17 @@
                 document.getElementById('editTitle').value = blog.title || '';
                 document.getElementById('editAuthor').value = blog.author || '';
                 document.getElementById('editReadTime').value = blog.read_time || '';
-                document.getElementById('editCoverImage').value = blog.cover_image || '';
-                document.getElementById('editContent').value = blog.content || '';
+                setCoverPreview(blog.cover_image || '');
+                setCoverStatus('', '');
+                document.getElementById('editCoverFile').value = '';
+
+                const editor = tinymce.get('editContent');
+                if (editor) {
+                    editor.setContent(blog.content || '');
+                } else {
+                    document.getElementById('editContent').value = blog.content || '';
+                }
+
                 modal.style.display = 'flex';
             } catch (error) {
                 console.error('Error:', error);
@@ -348,12 +410,21 @@
         editForm.onsubmit = async (e) => {
             e.preventDefault();
             const id = document.getElementById('editId').value;
+            const editor = tinymce.get('editContent');
+            const content = editor ? editor.getContent() : document.getElementById('editContent').value;
+
+            if (!content.trim()) {
+                alert('Content cannot be empty.');
+                return;
+            }
+
             const data = {
                 title: document.getElementById('editTitle').value,
                 author: document.getElementById('editAuthor').value,
-                read_time: document.getElementById('editReadTime').value,
+                // Sent even when blank so it can be cleared — read_time is optional.
+                read_time: document.getElementById('editReadTime').value.trim(),
                 cover_image: document.getElementById('editCoverImage').value,
-                content: document.getElementById('editContent').value
+                content
             };
 
             try {
@@ -458,6 +529,52 @@
                 alert('An error occurred while deleting.');
             }
         }
+
+        function setCoverPreview(url) {
+            document.getElementById('editCoverImage').value = url || '';
+            const box = document.getElementById('editCoverPreview');
+            box.innerHTML = url
+                ? `<img src="${url}" alt="Cover image">`
+                : '<span class="cover-empty">No cover image</span>';
+        }
+
+        function setCoverStatus(cls, text) {
+            const el = document.getElementById('editCoverStatus');
+            el.className = 'cover-status ' + cls;
+            el.textContent = text;
+        }
+
+        document.getElementById('editCoverBtn').addEventListener('click', () => {
+            document.getElementById('editCoverFile').click();
+        });
+
+        // Uploading here returns the stored URL, which goes straight into the hidden field —
+        // the same flow the add-blog page uses, so there is no URL to copy or paste.
+        document.getElementById('editCoverFile').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                setCoverStatus('failed', 'Not an image');
+                return;
+            }
+
+            setCoverStatus('uploading', 'Uploading...');
+            const formData = new FormData();
+            formData.append('blog_image', file);
+
+            try {
+                const res = await fetch('/v1/blog/image', { method: 'POST', body: formData });
+                const result = await res.json();
+                if (!res.ok || !result.success || !result.url) {
+                    throw new Error(result.message || 'Upload failed');
+                }
+                setCoverPreview(result.url);
+                setCoverStatus('done', 'Uploaded \u2713');
+            } catch (error) {
+                console.error('Cover upload failed:', error);
+                setCoverStatus('failed', 'Upload failed');
+            }
+        });
     </script>
 </body>
 </html>

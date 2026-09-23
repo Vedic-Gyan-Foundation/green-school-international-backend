@@ -96,7 +96,7 @@ class BlogController {
   static async updateBlog(req, res) {
     try {
       const { id } = req.params;
-      const { title, author, read_time, content } = req.body;
+      const { title, author, read_time, content, cover_image } = req.body;
 
       // Check if blog exists
       const existingBlog = await Blog.getById(id);
@@ -114,20 +114,24 @@ class BlogController {
       const updateData = {};
       if (title) updateData.title = title;
       if (author) updateData.author = author;
-      if (read_time) updateData.read_time = read_time;
       if (content) updateData.content = content;
 
-      // Handle cover image update
-      if (req.file) {
-        updateData.cover_image = `/uploads/${req.file.filename}`;
+      // read_time is optional and falls back to '5 min read' on create, so an empty string
+      // has to be allowed through here — a truthiness check made it impossible to clear.
+      if (read_time !== undefined) {
+        updateData.read_time = read_time === '' ? null : read_time;
+      }
 
-        // Delete old image if exists and is a local file
-        if (existingBlog.cover_image && existingBlog.cover_image.startsWith('/uploads/')) {
-          const oldImagePath = path.join(__dirname, '..', existingBlog.cover_image);
-          if (fs.existsSync(oldImagePath)) {
-            fs.unlinkSync(oldImagePath);
-          }
-        }
+      // cover_image was previously never read from the body, so editing the cover image
+      // did nothing at all and still reported success. The images are uploaded separately
+      // via POST /v1/blog/image, which returns the URL the client sends back here.
+      if (cover_image !== undefined) {
+        updateData.cover_image = cover_image === '' ? null : cover_image;
+      }
+
+      // Kept for multipart callers, though the update route registers no multer middleware.
+      if (req.file) {
+        updateData.cover_image = `${process.env.APP_URI}/blogs/${req.file.filename}`;
       }
 
       const affectedRows = await Blog.update(id, updateData);
