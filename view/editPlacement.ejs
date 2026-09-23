@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit a Spot on the Website - The Green School International</title>
+    <style>
+        :root {
+            --primary-color: #3d405b;
+            --secondary-color: #81b29a;
+            --accent-color: #f2cc8f;
+            --bg-color: #f4f1de;
+            --text-color: #3d405b;
+            --danger-color: #e07a5f;
+            --muted: #8a8ba0;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 820px;
+            margin-top: 20px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        h1 { margin: 0; color: var(--primary-color); font-size: 26px; }
+
+        .back-link { color: var(--muted); text-decoration: none; font-size: 14px; white-space: nowrap; }
+        .back-link:hover { color: var(--primary-color); }
+
+        .lede {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 0 0 28px;
+        }
+
+        .lede a { color: var(--primary-color); font-weight: 600; }
+
+        .panel {
+            border: 1px solid #e4e2d7;
+            border-radius: 10px;
+            padding: 26px;
+            margin-bottom: 26px;
+            background: #fcfbf6;
+        }
+
+        .panel h2 {
+            margin: 0 0 4px;
+            font-size: 19px;
+            color: var(--primary-color);
+        }
+
+        .panel-note {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 0 0 22px;
+        }
+
+        .form-group { margin-bottom: 22px; }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--primary-color);
+        }
+
+        .hint { font-size: 13px; color: var(--muted); font-weight: 400; margin-top: 5px; line-height: 1.5; }
+
+        select,
+        textarea,
+        input[type="text"],
+        input[type="url"],
+        input[type="number"] {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #d9d7cc;
+            border-radius: 6px;
+            font-size: 15px;
+            font-family: inherit;
+            background: #fff;
+            color: var(--text-color);
+        }
+
+        textarea { min-height: 84px; resize: vertical; line-height: 1.5; }
+
+        select:focus, textarea:focus, input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(129, 178, 154, 0.18);
+        }
+
+        .current-file {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 14px;
+            border: 1px solid #e4e2d7;
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        .current-file .file-icon { font-size: 26px; }
+
+        .current-file a {
+            color: var(--secondary-color);
+            font-weight: 600;
+            word-break: break-all;
+        }
+
+        .current-file a:hover { text-decoration: underline; }
+
+        .file-chosen {
+            font-size: 13px;
+            color: var(--secondary-color);
+            font-weight: 600;
+            margin-top: 8px;
+            min-height: 18px;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px dashed #d9d7cc;
+            border-radius: 6px;
+            background: #fff;
+            font-size: 14px;
+            margin-top: 12px;
+        }
+
+        .shared-note {
+            padding: 14px 16px;
+            border-radius: 8px;
+            background: #fdf6e3;
+            border: 1px solid var(--accent-color);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .shared-note ul { margin: 8px 0 0 18px; padding: 0; }
+        .shared-note li { margin-bottom: 3px; }
+
+        .solo-note {
+            padding: 14px 16px;
+            border-radius: 8px;
+            background: #fff;
+            border: 1px solid #e4e2d7;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--muted);
+        }
+
+        .checkbox-row { display: flex; align-items: center; gap: 9px; }
+        .checkbox-row input { width: 18px; height: 18px; }
+        .checkbox-row label { margin: 0; font-weight: 400; }
+
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+
+        @media (max-width: 620px) {
+            .two-col { grid-template-columns: 1fr; }
+        }
+
+        .actions { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
+
+        button.submit {
+            flex: 1;
+            min-width: 220px;
+            padding: 14px;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        button.submit:hover:not(:disabled) { background-color: #6a9c84; }
+        button.submit:disabled { background-color: #c5cfc9; cursor: not-allowed; }
+
+        a.cancel {
+            display: block;
+            text-align: center;
+            margin-top: 6px;
+            color: var(--muted);
+            font-size: 15px;
+            text-decoration: none;
+        }
+
+        a.cancel:hover { color: var(--primary-color); text-decoration: underline; }
+
+        .banner {
+            padding: 13px 15px;
+            border-radius: 6px;
+            margin-bottom: 22px;
+            display: none;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .banner.show { display: block; }
+        .banner.success { background: #e8f3ed; color: #2f6b4f; border: 1px solid var(--secondary-color); }
+        .banner.error { background: #fbeae5; color: #a4432a; border: 1px solid var(--danger-color); }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <%
+            const locationByKey = {};
+            locations.forEach((entry) => { locationByKey[entry.key] = entry; });
+
+            const current = locationByKey[placement.location] || {
+                key: placement.location,
+                path: placement.location,
+                groupUrl: 'https://greenschoolguwahati.com',
+                groupLinkText: 'greenschoolguwahati.com',
+                supportsSublabel: false,
+                supportsLinkLabel: false
+            };
+
+            const siblings = placement.siblings || [];
+            const placeCount = siblings.length + 1;
+
+            const fileName = (url) => {
+                const value = String(url || '');
+                const withoutQuery = value.split('?')[0];
+                let decoded = withoutQuery;
+                try {
+                    decoded = decodeURIComponent(withoutQuery);
+                } catch (error) {
+                    decoded = withoutQuery;
+                }
+                return decoded.substring(decoded.lastIndexOf('/') + 1) || decoded;
+            };
+
+            // Same guard the public pages apply. EJS escaping makes the attribute safe but not
+            // the scheme, so a 'javascript:' file_url saved on a link row would still be live
+            // here — and this page is where the next admin clicks it.
+            const safeHref = (url) => {
+                const trimmed = String(url || '').trim();
+                return /^(https?:)?\/\//i.test(trimmed) || trimmed.startsWith('/') ? trimmed : '';
+            };
+        %>
+
+        <div class="topbar">
+            <h1>Edit a spot on the website</h1>
+            <a class="back-link" href="/admin/documents">&larr; Back to Documents</a>
+        </div>
+        <p class="lede">
+            You are editing <strong><%= placement.where %></strong> &mdash;
+            <a href="<%= current.groupUrl %>" target="_blank" rel="noopener noreferrer">open <%= current.groupLinkText %> &#8599;</a>
+            to see it. There are two things on this page and they are separate: the
+            <strong>wording and position</strong> of this one spot, and the <strong>document</strong> that sits
+            behind it, which may be used elsewhere too. Each has its own save button.
+        </p>
+
+        <div id="banner" class="banner"></div>
+
+        <form id="placementForm" class="panel">
+            <h2>1. This spot on the website</h2>
+            <p class="panel-note">
+                Only this one place changes. The document behind it is not touched.
+            </p>
+
+            <div class="form-group">
+                <label for="label">The wording visitors see</label>
+                <textarea id="label" required><%= placement.label %></textarea>
+                <div class="hint">
+                    Exactly as it reads on the website. On the public disclosure page this is the regulator's
+                    own wording, so change it only if it is genuinely wrong.
+                </div>
+            </div>
+
+            <div class="form-group <%= current.supportsSublabel ? '' : 'hidden' %>" id="sublabelGroup">
+                <label for="sublabel">Small grey line underneath</label>
+                <input type="text" id="sublabel" value="<%= placement.sublabel || '' %>" placeholder="e.g. PDF &middot; Current academic session">
+                <div class="hint">The quieter second line the Fee Structure menu shows. Empty means no second line.</div>
+            </div>
+
+            <div class="form-group <%= current.supportsSublabel ? '' : 'hidden' %>" id="iconGroup">
+                <label for="icon">Little picture beside it</label>
+                <select id="icon">
+                    <option value="document" <%= placement.icon === 'document' || !placement.icon ? 'selected' : '' %>>Document with a downward arrow, dark green &mdash; the usual one</option>
+                    <option value="sparkles" <%= placement.icon === 'sparkles' ? 'selected' : '' %>>Sparkles, gold &mdash; used for the fee approval order</option>
+                    <option value="shield" <%= placement.icon === 'shield' ? 'selected' : '' %>>Document with a downward arrow, light green &mdash; used for the cancellation policy</option>
+                </select>
+                <div class="hint">Only the Fee Structure menu draws these. Pick by the picture and colour you want &mdash; the names are just labels.</div>
+            </div>
+
+            <div class="form-group <%= current.supportsLinkLabel ? '' : 'hidden' %>" id="linkLabelGroup">
+                <label for="link_label">Wording of the link</label>
+                <input type="text" id="link_label" value="<%= placement.link_label || '' %>" placeholder="Click to Download">
+                <div class="hint">The blue link text in the table. Every other row says &ldquo;Click to Download&rdquo;.</div>
+            </div>
+
+            <div class="two-col">
+                <div class="form-group">
+                    <label for="location">Which place on the website</label>
+                    <select id="location">
+                        <% locations.forEach((entry) => { %>
+                            <option value="<%= entry.key %>"
+                                    data-sublabel="<%= entry.supportsSublabel ? 'yes' : 'no' %>"
+                                    data-linklabel="<%= entry.supportsLinkLabel ? 'yes' : 'no' %>"
+                                    <%= entry.key === placement.location ? 'selected' : '' %>>
+                                <%= entry.path %>
+                            </option>
+                        <% }); %>
+                        <% if (!locationByKey[placement.location]) { %>
+                            <option value="<%= placement.location %>" selected><%= placement.location %></option>
+                        <% } %>
+                    </select>
+                    <div class="hint">Moving it here takes it off the old place and puts it on the new one.</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="display_order">Position in that block</label>
+                    <input type="number" id="display_order" min="1" step="1" value="<%= placement.display_order %>">
+                    <div class="hint">
+                        1 is the top. The numbers visitors see are worked out from these positions, so the rows
+                        around it renumber themselves.
+                        <% if (placement.sl_no) { %>
+                            It is currently row <%= placement.sl_no %> on the website.
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group checkbox-row">
+                <input type="checkbox" id="is_visible" <%= placement.is_visible ? 'checked' : '' %>>
+                <label for="is_visible">Show this on the website</label>
+            </div>
+
+            <div class="form-group checkbox-row <%= current.supportsLinkLabel ? '' : 'hidden' %>" id="numberedGroup">
+                <input type="checkbox" id="is_numbered" <%= placement.is_numbered ? 'checked' : '' %>>
+                <label for="is_numbered">Give it an SL number in the main table</label>
+            </div>
+            <div class="hint <%= current.supportsLinkLabel ? '' : 'hidden' %>" id="numberedHint" style="margin-top:-14px;">
+                Unticked, it sits in the small table underneath without a number &mdash; that is where the
+                inspection video link lives.
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="submit" id="placementBtn">Save the wording and position</button>
+            </div>
+        </form>
+
+        <form id="documentForm" class="panel">
+            <h2>2. The document behind it</h2>
+            <p class="panel-note">
+                This is the file a visitor actually gets. Changing it changes every place it is used.
+            </p>
+
+            <% if (siblings.length > 0) { %>
+                <div class="shared-note">
+                    <strong>Careful: this same file is used in <%= placeCount %> places on the website.</strong>
+                    Replacing it here replaces it in all of them:
+                    <ul>
+                        <li><%= placement.where %> &mdash; this one</li>
+                        <% siblings.forEach((other) => { %>
+                            <li><%= other.where %></li>
+                        <% }); %>
+                    </ul>
+                    That is deliberate &mdash; it is how the same document stays identical everywhere it is
+                    published. Nothing above in part 1 is affected.
+                </div>
+            <% } else { %>
+                <div class="solo-note">
+                    This file is used in one place only &mdash; the spot you are editing above.
+                </div>
+            <% } %>
+
+            <div class="form-group">
+                <label>The file right now</label>
+                <div class="current-file">
+                    <span class="file-icon">&#128196;</span>
+                    <a href="<%= safeHref(placement.file_url) %>" target="_blank" rel="noopener noreferrer">
+                        <% if (placement.kind === 'link') { %>
+                            <%= placement.file_url %>
+                        <% } else { %>
+                            <%= fileName(placement.file_url) %>
+                        <% } %>
+                    </a>
+                    <span class="hint" style="margin:0;">Opens in a new tab &mdash; check it before you change it.</span>
+                </div>
+
+                <% if (placement.kind === 'link') { %>
+                    <%# A 'link' document has no file to swap: its address is the content, so an address
+                        box is the only way to change where it goes. %>
+                    <div class="form-group" style="margin-top:16px;margin-bottom:0;">
+                        <label for="file_url">Web address it opens</label>
+                        <input type="url" id="file_url" value="<%= placement.file_url %>">
+                        <div class="hint">This one opens a web page instead of downloading a file.</div>
+                    </div>
+                <% } else { %>
+                    <input type="file" id="document" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx">
+                    <div class="file-chosen" id="fileChosen"></div>
+                    <div class="hint">
+                        Leave this empty to keep the file above. Choose one and every place listed here points
+                        at the new file as soon as you save &mdash; no wording changes anywhere.
+                    </div>
+                <% } %>
+            </div>
+
+            <div class="form-group">
+                <label for="name">Short name for your own list</label>
+                <input type="text" id="name" value="<%= placement.name %>" maxlength="255">
+                <div class="hint">
+                    How this file is listed for you when you want to publish it somewhere else as well.
+                    Visitors never see it.
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="submit" id="documentBtn">Save the document</button>
+            </div>
+        </form>
+
+        <a class="cancel" href="/admin/documents">Cancel and go back to Documents</a>
+    </div>
+
+    <script>
+        const $ = (id) => document.getElementById(id);
+        const banner = $('banner');
+        const fileInput = $('document');
+        const placeCount = <%= placeCount %>;
+
+        // nginx refuses an upload over 20MB with its own HTML error page, which response.json()
+        // would surface as a syntax error nobody can act on.
+        const readJson = async (response) => {
+            try {
+                return await response.json();
+            } catch (error) {
+                if (response.status === 413) {
+                    throw new Error('That file is too large for the server. Keep it under 20 MB.');
+                }
+                throw new Error(`The server gave an unexpected reply (HTTP ${response.status}).`);
+            }
+        };
+
+        const showBanner = (kind, text) => {
+            banner.className = 'banner show ' + kind;
+            banner.textContent = text;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // The fields a spot offers depend on which place it is: the Fee Structure menu draws a
+        // subtitle and an icon, the disclosure tables have link wording and SL numbers.
+        const applyLocation = () => {
+            const option = $('location').options[$('location').selectedIndex];
+            const wantsSublabel = option.dataset.sublabel === 'yes';
+            const wantsLinkLabel = option.dataset.linklabel === 'yes';
+
+            $('sublabelGroup').classList.toggle('hidden', !wantsSublabel);
+            $('iconGroup').classList.toggle('hidden', !wantsSublabel);
+            $('linkLabelGroup').classList.toggle('hidden', !wantsLinkLabel);
+            $('numberedGroup').classList.toggle('hidden', !wantsLinkLabel);
+            $('numberedHint').classList.toggle('hidden', !wantsLinkLabel);
+        };
+
+        $('location').addEventListener('change', applyLocation);
+
+        if (fileInput) {
+            fileInput.addEventListener('change', () => {
+                const file = fileInput.files[0];
+                $('fileChosen').textContent = file ? 'Chosen: ' + file.name : '';
+            });
+        }
+
+        // Part 1 — the spot. Wording, position and visibility only.
+        $('placementForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const label = $('label').value.trim();
+            if (!label) return showBanner('error', 'The wording cannot be empty.');
+
+            const option = $('location').options[$('location').selectedIndex];
+            const payload = {
+                location: $('location').value,
+                label: label,
+                display_order: Number($('display_order').value) || 1,
+                is_visible: $('is_visible').checked,
+                is_numbered: $('is_numbered').checked
+            };
+
+            if (option.dataset.sublabel === 'yes') {
+                payload.sublabel = $('sublabel').value.trim();
+                payload.icon = $('icon').value;
+            }
+            if (option.dataset.linklabel === 'yes') {
+                payload.link_label = $('link_label').value.trim();
+            }
+
+            const button = $('placementBtn');
+            button.disabled = true;
+            button.textContent = 'Saving...';
+
+            try {
+                const response = await fetch('/v1/placements/update/<%= placement.id %>', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                    credentials: 'same-origin'
+                });
+                const result = await readJson(response);
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'Save failed');
+                }
+
+                showBanner('success', 'Saved. The website shows the new wording straight away.');
+            } catch (error) {
+                console.error('Update placement error:', error);
+                showBanner('error', 'Could not save: ' + error.message);
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Save the wording and position';
+            }
+        });
+
+        // Part 2 — the document. A shared file changes several pages at once, so it says which
+        // before anything is sent.
+        $('documentForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const name = $('name').value.trim();
+            if (!name) return showBanner('error', 'Give the document a short name for your own list.');
+
+            const urlInput = $('file_url');
+            const file = fileInput ? fileInput.files[0] : null;
+
+            if (urlInput && !urlInput.value.trim()) {
+                return showBanner('error', 'Paste the web address this should open.');
+            }
+
+            const changingFile =
+                Boolean(file) || Boolean(urlInput && urlInput.value.trim() !== urlInput.defaultValue.trim());
+            if (changingFile && placeCount > 1) {
+                const list = Array.from(document.querySelectorAll('.shared-note li')).map(
+                    (item) => '• ' + item.textContent.trim()
+                );
+                const message =
+                    `This file is used in ${placeCount} places on the website:\n\n` +
+                    list.join('\n') +
+                    '\n\nAll of them will change. Continue?';
+                if (!confirm(message)) return;
+            }
+
+            const button = $('documentBtn');
+            button.disabled = true;
+            button.textContent = 'Saving...';
+
+            try {
+                let response;
+
+                if (file) {
+                    const formData = new FormData();
+                    formData.append('name', name);
+                    formData.append('document', file);
+
+                    response = await fetch('/v1/documents/update/<%= placement.document_id %>', {
+                        method: 'PUT',
+                        body: formData,
+                        credentials: 'same-origin'
+                    });
+                } else {
+                    const payload = { name: name };
+                    if (urlInput) {
+                        payload.file_url = urlInput.value.trim();
+                    }
+
+                    response = await fetch('/v1/documents/update/<%= placement.document_id %>', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                        credentials: 'same-origin'
+                    });
+                }
+
+                const result = await readJson(response);
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'Save failed');
+                }
+
+                const where =
+                    placeCount > 1
+                        ? `Saved. All ${placeCount} places now use it. Refreshing...`
+                        : 'Saved. Refreshing...';
+                showBanner('success', where);
+                setTimeout(() => location.reload(), 1400);
+            } catch (error) {
+                console.error('Update document error:', error);
+                showBanner('error', 'Could not save: ' + error.message);
+                button.disabled = false;
+                button.textContent = 'Save the document';
+            }
+        });
+
+        applyLocation();
+    </script>
+</body>
+</html>

@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documents - The Green School International</title>
+    <style>
+        :root {
+            --primary-color: #3d405b;
+            --secondary-color: #81b29a;
+            --accent-color: #f2cc8f;
+            --bg-color: #f4f1de;
+            --text-color: #3d405b;
+            --danger-color: #e07a5f;
+            --muted: #8a8ba0;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1220px;
+            margin: 0 auto;
+        }
+
+        .back-to-dash {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-to-dash:hover { text-decoration: underline; }
+
+        header {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h1 { color: var(--primary-color); margin: 0; }
+
+        .live-link {
+            color: var(--primary-color);
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .live-link:hover { text-decoration: underline; }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary:hover { background-color: #2a2c3e; }
+
+        .btn-danger { background-color: var(--danger-color); color: white; }
+        .btn-danger:hover { background-color: #c05c45; }
+
+        .btn-secondary { background-color: #e4e2d7; color: var(--primary-color); }
+        .btn-secondary:hover { background-color: #d7d4c6; }
+
+        .btn-sm { padding: 6px 14px; font-size: 13px; }
+
+        .btn:disabled {
+            background-color: #c5cfc9;
+            color: #fff;
+            cursor: not-allowed;
+        }
+
+        .explainer {
+            background: #fffdf5;
+            border: 1px solid #e4e2d7;
+            border-left: 4px solid var(--secondary-color);
+            border-radius: 6px;
+            padding: 16px 20px;
+            margin-bottom: 34px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .explainer p { margin: 0 0 8px; }
+        .explainer p:last-child { margin-bottom: 0; }
+
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 0 0 4px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #ddd9c8;
+        }
+
+        .group-header h2 {
+            color: var(--primary-color);
+            font-size: 23px;
+            margin: 0;
+        }
+
+        .group-gap { height: 34px; }
+
+        .block { margin-bottom: 42px; }
+
+        .block-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .block h3 {
+            color: var(--primary-color);
+            font-size: 18px;
+            margin: 26px 0 4px;
+        }
+
+        .block-note {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 0 0 14px;
+            max-width: 780px;
+        }
+
+        .group-caption {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--muted);
+            margin: 22px 0 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table-wrapper {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        thead th {
+            text-align: left;
+            padding: 15px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #777;
+            border-bottom: 2px solid #eee;
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: top;
+            font-size: 14px;
+        }
+
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background-color: #fafafa; }
+
+        tbody tr.row-hidden { background-color: #f7f6f1; }
+        tbody tr.row-hidden .doc-label { color: var(--muted); }
+
+        .sl-cell {
+            width: 70px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .doc-label {
+            font-weight: 500;
+            color: var(--primary-color);
+            max-width: 430px;
+            line-height: 1.5;
+        }
+
+        .doc-sublabel {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 3px;
+        }
+
+        .file-link {
+            color: var(--secondary-color);
+            font-weight: 600;
+            word-break: break-all;
+        }
+
+        .file-link:hover { text-decoration: underline; }
+
+        .file-hint {
+            display: block;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.5;
+            margin-top: 4px;
+        }
+
+        .shared-note {
+            margin-top: 10px;
+            padding: 10px 12px;
+            border-radius: 6px;
+            background: #fdf6e3;
+            border: 1px solid var(--accent-color);
+            font-size: 13px;
+            line-height: 1.5;
+            max-width: 430px;
+        }
+
+        .shared-note ul { margin: 5px 0 5px 18px; padding: 0; }
+        .shared-note li { margin-bottom: 2px; }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .badge-hidden {
+            background-color: #f1f1f1;
+            color: #777;
+            margin-top: 8px;
+        }
+
+        .muted { color: var(--muted); }
+
+        .actions-cell { width: 320px; }
+
+        .replace-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .replace-row input[type="file"] {
+            font-size: 12px;
+            max-width: 185px;
+        }
+
+        .row-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .row-status {
+            font-size: 13px;
+            line-height: 1.5;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .row-status.show { display: block; }
+        .row-status.working { color: var(--muted); }
+        .row-status.done { color: #2f6b4f; font-weight: 600; }
+        .row-status.error { color: var(--danger-color); font-weight: 600; }
+
+        .block-footer { margin-top: 18px; }
+
+        .empty-state {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a class="back-to-dash" href="/admin">&larr; Back to Admin Dashboard</a>
+        <header>
+            <h1>Documents</h1>
+        </header>
+
+        <div class="explainer">
+            <p>
+                Every document a visitor can download from the school website is listed below, grouped by
+                <strong>where it appears on the site</strong>. Each block is a real place you can go and look at
+                &mdash; a section of the public disclosure page, the Fee Structure menu at the top of the site,
+                or the button on the admissions page. The link beside each block opens it.
+            </p>
+            <p>
+                <strong>Replace file</strong> swaps the document behind a link. The wording on the website stays
+                exactly as it is &mdash; only the file a visitor downloads changes.
+                <strong>Edit</strong> changes the wording, the position or whether the row is shown.
+            </p>
+            <p>
+                <strong>One document can appear in more than one place.</strong> The fee structure, for example,
+                is shown both on the public disclosure page and in the Fee Structure menu, and it is the same
+                file in both. Any row that shares its document says so, and replacing that file updates every
+                place at once &mdash; you are asked to confirm, and told exactly which pages will change. That
+                is the point: upload once, and the website can never end up showing two different fee structures.
+            </p>
+            <p>
+                The numbers below are the ones a visitor sees. They come from the order of the rows, so removing
+                or hiding a row renumbers the rest by itself. Everything you change here is live straight away.
+            </p>
+        </div>
+
+        <%
+            // An admin recognises FIRE_NOC.pdf; they have never seen the URL it lives at.
+            const fileName = (url) => {
+                const value = String(url || '');
+                const withoutQuery = value.split('?')[0];
+                let decoded = withoutQuery;
+                try {
+                    decoded = decodeURIComponent(withoutQuery);
+                } catch (error) {
+                    decoded = withoutQuery;
+                }
+                return decoded.substring(decoded.lastIndexOf('/') + 1) || decoded;
+            };
+
+            // Same guard the public pages apply. EJS escaping makes the attribute safe but not
+            // the scheme, so a 'javascript:' file_url saved on a link row would still be live
+            // here — and this page is where the next admin clicks it.
+            const safeHref = (url) => {
+                const trimmed = String(url || '').trim();
+                return /^(https?:)?\/\//i.test(trimmed) || trimmed.startsWith('/') ? trimmed : '';
+            };
+
+            const locationByKey = {};
+            locations.forEach((entry) => { locationByKey[entry.key] = entry; });
+
+            const blocks = locations.map((entry) => ({ entry: entry, rows: grouped[entry.key] || [] }));
+
+            // A placement saved under an unrecognised location would otherwise be invisible here,
+            // and the column is a free-text VARCHAR. Better an odd-looking block than a document
+            // nobody can find.
+            Object.keys(grouped).forEach((key) => {
+                if (locationByKey[key]) return;
+                const fallback = {
+                    key: key,
+                    group: null,
+                    groupUrl: 'https://greenschoolguwahati.com',
+                    groupLinkText: 'greenschoolguwahati.com',
+                    heading: 'Somewhere else on the website (' + key + ')',
+                    path: key,
+                    numberHeading: 'Order',
+                    supportsSublabel: false,
+                    splitNumbered: false,
+                    blurb: 'These rows are filed under a place this panel does not know about. Ask a developer before changing them.'
+                };
+                locationByKey[key] = fallback;
+                blocks.push({ entry: fallback, rows: grouped[key] || [] });
+            });
+
+            // Every place the row's document is published, this row included — the list the
+            // confirm dialog reads out before a file is replaced.
+            const placesFor = (row) => [row.where].concat((row.siblings || []).map((other) => other.where));
+
+            let lastGroup = null;
+        %>
+
+        <% blocks.forEach((block) => { %>
+            <% if (block.entry.group && block.entry.group !== lastGroup) { %>
+                <div class="group-header">
+                    <h2><%= block.entry.group %></h2>
+                    <a class="live-link" href="<%= block.entry.groupUrl %>" target="_blank" rel="noopener noreferrer">
+                        <%= block.entry.groupLinkText %> &#8599;
+                    </a>
+                </div>
+            <% } else if (!block.entry.group && lastGroup !== null) { %>
+                <div class="group-gap"></div>
+            <% } %>
+            <% lastGroup = block.entry.group; %>
+
+            <div class="block">
+                <div class="block-head">
+                    <h3><%= block.entry.heading %></h3>
+                    <% if (!block.entry.group) { %>
+                        <a class="live-link" href="<%= block.entry.groupUrl %>" target="_blank" rel="noopener noreferrer">
+                            <%= block.entry.groupLinkText %> &#8599;
+                        </a>
+                    <% } %>
+                </div>
+                <p class="block-note"><%= block.entry.blurb %></p>
+
+                <% if (block.rows.length === 0) { %>
+                    <div class="empty-state">
+                        Nothing appears here yet. Use the button below to put the first document in this spot.
+                    </div>
+                <% } else { %>
+                    <%
+                        // Sections B and C print a numbered table with a small unnumbered one beneath
+                        // it; the fee menu and the admissions button are a single plain list.
+                        const groups = block.entry.splitNumbered
+                            ? [
+                                { caption: null, rows: block.rows.filter((row) => row.is_numbered) },
+                                {
+                                    caption: 'Extra row(s) — shown under the numbered table on the website, without an SL number',
+                                    rows: block.rows.filter((row) => !row.is_numbered)
+                                }
+                              ]
+                            : [{ caption: null, rows: block.rows }];
+                    %>
+                    <% groups.forEach((group) => { %>
+                        <% if (group.rows.length > 0) { %>
+                            <% if (group.caption) { %>
+                                <p class="group-caption"><%= group.caption %></p>
+                            <% } %>
+                            <div class="table-wrapper">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th><%= block.entry.numberHeading %></th>
+                                            <th>What the website shows</th>
+                                            <th>The document behind it</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% group.rows.forEach((row) => { %>
+                                            <tr id="row-<%= row.id %>" class="<%= row.is_visible ? '' : 'row-hidden' %>">
+                                                <td class="sl-cell">
+                                                    <% if (row.sl_no) { %>
+                                                        <%= row.sl_no %>
+                                                    <% } else { %>
+                                                        <span class="muted">&mdash;</span>
+                                                    <% } %>
+                                                </td>
+                                                <td>
+                                                    <div class="doc-label"><%= row.label %></div>
+                                                    <% if (block.entry.supportsSublabel && row.sublabel) { %>
+                                                        <div class="doc-sublabel"><%= row.sublabel %></div>
+                                                    <% } %>
+                                                    <% if (!row.is_visible) { %>
+                                                        <span class="badge badge-hidden">Hidden &mdash; not on the website</span>
+                                                    <% } %>
+                                                    <% if ((row.siblings || []).length > 0) { %>
+                                                        <div class="shared-note">
+                                                            <strong>Same document as:</strong>
+                                                            <ul>
+                                                                <% row.siblings.forEach((other) => { %>
+                                                                    <li><%= other.where %></li>
+                                                                <% }); %>
+                                                            </ul>
+                                                            It is one file. Replacing it here replaces it there too.
+                                                        </div>
+                                                    <% } %>
+                                                </td>
+                                                <td>
+                                                    <a class="file-link" href="<%= safeHref(row.file_url) %>" target="_blank" rel="noopener noreferrer">
+                                                        <% if (row.kind === 'link') { %>
+                                                            <%= row.file_url %>
+                                                        <% } else { %>
+                                                            <%= fileName(row.file_url) %>
+                                                        <% } %>
+                                                    </a>
+                                                    <span class="file-hint">
+                                                        <% if (row.kind === 'link') { %>
+                                                            This is a web page, not a file. It opens in a new tab.
+                                                            Use Edit to change where it points.
+                                                        <% } else { %>
+                                                            Opens in a new tab &mdash; check it before you replace it.
+                                                            Filed in the library as &ldquo;<%= row.name %>&rdquo;.
+                                                        <% } %>
+                                                        <% if (row.link_label) { %>
+                                                            The link on the website reads &ldquo;<%= row.link_label %>&rdquo;.
+                                                        <% } %>
+                                                    </span>
+                                                </td>
+                                                <td class="actions-cell">
+                                                    <% if (row.kind !== 'link') { %>
+                                                        <div class="replace-row">
+                                                            <input type="file" id="file-<%= row.id %>" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx" onchange="showPicked(<%= row.id %>)">
+                                                            <button class="btn btn-secondary btn-sm" id="replace-btn-<%= row.id %>"
+                                                                    data-document="<%= row.document_id %>"
+                                                                    data-places="<%= JSON.stringify(placesFor(row)) %>"
+                                                                    onclick="replaceFile(<%= row.id %>, this)">Replace file</button>
+                                                        </div>
+                                                    <% } %>
+                                                    <div class="row-actions">
+                                                        <a class="btn btn-primary btn-sm" href="/admin/documents/placement/<%= row.id %>">Edit</a>
+                                                        <button class="btn btn-danger btn-sm"
+                                                                data-label="<%= row.label %>"
+                                                                data-place="<%= row.where %>"
+                                                                data-others="<%= JSON.stringify((row.siblings || []).map((other) => other.where)) %>"
+                                                                onclick="removePlacement(<%= row.id %>, this)">Remove from this page</button>
+                                                    </div>
+                                                    <div class="row-status" id="status-<%= row.id %>"></div>
+                                                </td>
+                                            </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <% } %>
+                    <% }); %>
+                <% } %>
+
+                <div class="block-footer">
+                    <a class="btn btn-primary" href="/admin/documents/add?location=<%= block.entry.key %>">
+                        + Add a document to <%= block.entry.heading %>
+                    </a>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+
+    <script>
+        function setStatus(id, kind, message) {
+            const box = document.getElementById(`status-${id}`);
+            box.className = `row-status show ${kind}`;
+            box.textContent = message;
+        }
+
+        // nginx refuses an upload over 20MB with its own HTML error page, which response.json()
+        // would surface as a syntax error nobody can act on.
+        async function readJson(response) {
+            try {
+                return await response.json();
+            } catch (error) {
+                if (response.status === 413) {
+                    throw new Error('That file is too large for the server. Keep it under 20 MB.');
+                }
+                throw new Error(`The server gave an unexpected reply (HTTP ${response.status}).`);
+            }
+        }
+
+        function parseList(value) {
+            try {
+                const parsed = JSON.parse(value || '[]');
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function bullets(items) {
+            return items.map((item) => '• ' + item).join('\n');
+        }
+
+        function showPicked(id) {
+            const file = document.getElementById(`file-${id}`).files[0];
+            if (file) {
+                setStatus(id, 'working', `Ready to upload: ${file.name} — click Replace file.`);
+            }
+        }
+
+        // One step: the picked file is uploaded and every row pointing at that document follows
+        // it, in the same request. Nobody ever handles a URL by hand.
+        async function replaceFile(placementId, button) {
+            const input = document.getElementById(`file-${placementId}`);
+            const file = input.files[0];
+
+            if (!file) {
+                setStatus(placementId, 'error', 'Choose a file first, then click Replace file.');
+                return;
+            }
+
+            const places = parseList(button.dataset.places);
+
+            // Replacing a shared file quietly changes a page the admin was not even looking at,
+            // so every affected spot is named before anything is uploaded.
+            if (places.length > 1) {
+                const message =
+                    `Replacing this file updates ${places.length} places on the website:\n\n` +
+                    bullets(places) +
+                    '\n\nAll of them will serve the new file. Continue?';
+                if (!confirm(message)) return;
+            }
+
+            button.disabled = true;
+            button.textContent = 'Uploading...';
+            setStatus(placementId, 'working', `Uploading ${file.name}...`);
+
+            const formData = new FormData();
+            formData.append('document', file);
+
+            try {
+                const response = await fetch(`/v1/documents/update/${button.dataset.document}`, {
+                    method: 'PUT',
+                    body: formData,
+                    credentials: 'same-origin'
+                });
+                const result = await readJson(response);
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'Replace failed');
+                }
+
+                const changed =
+                    places.length > 1
+                        ? `Replaced in ${places.length} places: ${places.join('; ')}.`
+                        : `Replaced in ${places[0] || 'this spot'}.`;
+                setStatus(placementId, 'done', `${changed} Refreshing the list...`);
+                setTimeout(() => location.reload(), 1600);
+            } catch (error) {
+                console.error('Replace document file error:', error);
+                setStatus(placementId, 'error', `Could not replace the file: ${error.message}`);
+                button.disabled = false;
+                button.textContent = 'Replace file';
+            }
+        }
+
+        // Removing a row is not deleting a document — the confirm has to keep those apart, or an
+        // admin tidying one menu takes a file off the compliance page as well.
+        async function removePlacement(placementId, button) {
+            const others = parseList(button.dataset.others);
+
+            let message =
+                `Remove "${button.dataset.label}" from ${button.dataset.place}?\n\n` +
+                'This takes it off that one spot. The document itself is not deleted.\n\n';
+
+            message +=
+                others.length > 0
+                    ? 'The same document stays on the website at:\n' + bullets(others)
+                    : 'It is not used anywhere else, so after this nothing on the website links to ' +
+                      'that document. It stays in the library and can be put back later.';
+
+            message += '\n\nRows under it move up a number.';
+
+            if (!confirm(message)) return;
+
+            try {
+                const response = await fetch(`/v1/placements/delete/${placementId}`, {
+                    method: 'DELETE',
+                    credentials: 'same-origin'
+                });
+                const result = await readJson(response);
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'Remove failed');
+                }
+
+                // Reload rather than drop the row: the numbers below it have all shifted, and a
+                // sibling row elsewhere on the page has lost its "same document as" note.
+                location.reload();
+            } catch (error) {
+                console.error('Remove placement error:', error);
+                setStatus(placementId, 'error', `Could not remove it: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>

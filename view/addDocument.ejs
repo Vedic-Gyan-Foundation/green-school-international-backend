@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add a Document - The Green School International</title>
+    <style>
+        :root {
+            --primary-color: #3d405b;
+            --secondary-color: #81b29a;
+            --accent-color: #f2cc8f;
+            --bg-color: #f4f1de;
+            --text-color: #3d405b;
+            --danger-color: #e07a5f;
+            --muted: #8a8ba0;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 720px;
+            margin-top: 20px;
+        }
+
+        h1 { text-align: center; margin-bottom: 8px; color: var(--primary-color); }
+
+        .lede {
+            text-align: center;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 0 0 30px;
+        }
+
+        .form-group { margin-bottom: 22px; }
+
+        label { display: block; margin-bottom: 8px; font-weight: bold; }
+
+        select,
+        textarea,
+        input[type="text"],
+        input[type="url"],
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 15px;
+            font-family: inherit;
+            background: #fff;
+            color: var(--text-color);
+        }
+
+        textarea { min-height: 80px; resize: vertical; line-height: 1.5; }
+
+        select:focus, textarea:focus, input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        .hint {
+            font-size: 13px;
+            color: var(--muted);
+            font-weight: 400;
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        .where-note {
+            background: #fffdf5;
+            border: 1px solid #e4e2d7;
+            border-left: 4px solid var(--secondary-color);
+            border-radius: 6px;
+            padding: 12px 14px;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+
+        .where-note a { color: var(--primary-color); font-weight: 600; }
+
+        .file-chosen {
+            font-size: 13px;
+            color: var(--secondary-color);
+            font-weight: 600;
+            margin-top: 6px;
+            min-height: 18px;
+        }
+
+        .source-box {
+            border: 1px solid #e4e2d7;
+            border-radius: 8px;
+            padding: 18px;
+            background: #fcfbf6;
+            margin-bottom: 22px;
+        }
+
+        .source-box > label { margin-bottom: 12px; }
+
+        .radio-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin-bottom: 12px;
+        }
+
+        .radio-row input { width: auto; margin-top: 3px; }
+        .radio-row label { margin: 0; font-weight: 400; line-height: 1.5; }
+        .radio-row label strong { font-weight: 600; }
+        .radio-row .hint { margin-top: 2px; }
+
+        .source-panel {
+            margin-top: 6px;
+            padding-top: 18px;
+            border-top: 1px solid #e4e2d7;
+        }
+
+        .reuse-note {
+            background: #fdf6e3;
+            border: 1px solid var(--accent-color);
+            border-radius: 6px;
+            padding: 12px 14px;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+
+        .reuse-note ul { margin: 6px 0 0 18px; padding: 0; }
+
+        button, .btn {
+            padding: 12px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover, .btn:hover { background-color: #2a2c3e; }
+
+        .btn-submit { width: 100%; }
+        .btn-submit:disabled { background-color: #c5cfc9; cursor: not-allowed; }
+
+        .advanced {
+            border: 1px solid #e4e2d7;
+            border-radius: 6px;
+            padding: 0 16px;
+            margin-bottom: 22px;
+            background: #fcfbf6;
+        }
+
+        .advanced summary {
+            cursor: pointer;
+            padding: 14px 0;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--primary-color);
+        }
+
+        .advanced[open] summary { border-bottom: 1px solid #e4e2d7; }
+        .advanced .advanced-body { padding: 18px 0 4px; }
+
+        .checkbox-row { display: flex; align-items: center; gap: 9px; }
+        .checkbox-row input { width: 18px; height: 18px; }
+        .checkbox-row label { margin: 0; font-weight: 400; }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            display: none;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .alert.show { display: block; }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #fbeae5;
+            color: #a4432a;
+            border: 1px solid var(--danger-color);
+        }
+
+        .alert a { color: inherit; font-weight: 600; }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover { text-decoration: underline; }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Add a Document</h1>
+        <p class="lede">
+            This puts one more downloadable document on the school website, in the place you pick below.
+        </p>
+
+        <div class="alert alert-success" id="successBox"></div>
+        <div class="alert alert-error" id="errorBox"></div>
+
+        <%
+            const fileName = (url) => {
+                const value = String(url || '');
+                const withoutQuery = value.split('?')[0];
+                let decoded = withoutQuery;
+                try {
+                    decoded = decodeURIComponent(withoutQuery);
+                } catch (error) {
+                    decoded = withoutQuery;
+                }
+                return decoded.substring(decoded.lastIndexOf('/') + 1) || decoded;
+            };
+        %>
+
+        <form id="documentForm">
+            <div class="form-group">
+                <label for="location">Where on the website should this appear?</label>
+                <select id="location">
+                    <% locations.forEach((entry) => { %>
+                        <option value="<%= entry.key %>"
+                                data-sublabel="<%= entry.supportsSublabel ? 'yes' : 'no' %>"
+                                data-linklabel="<%= entry.supportsLinkLabel ? 'yes' : 'no' %>"
+                                data-defaultlinklabel="<%= entry.defaultLinkLabel || '' %>"
+                                data-defaultnumbered="<%= entry.defaultNumbered ? 'yes' : 'no' %>"
+                                data-blurb="<%= entry.blurb %>"
+                                data-url="<%= entry.groupUrl %>"
+                                data-urltext="<%= entry.groupLinkText %>"
+                                <%= entry.key === location ? 'selected' : '' %>>
+                            <%= entry.path %>
+                        </option>
+                    <% }); %>
+                </select>
+                <div class="where-note" id="whereNote"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="label">The wording visitors see</label>
+                <textarea id="label" placeholder="e.g. Fee Structure of the School" required></textarea>
+                <div class="hint">
+                    Exactly as it should read on the website. It goes at the bottom of that block, and the
+                    numbers around it work themselves out.
+                </div>
+            </div>
+
+            <div class="form-group hidden" id="sublabelGroup">
+                <label for="sublabel">Small grey line underneath</label>
+                <input type="text" id="sublabel" placeholder="e.g. PDF &middot; Current academic session">
+                <div class="hint">
+                    The second, quieter line the Fee Structure menu shows under each item. Leave it empty for
+                    no second line.
+                </div>
+            </div>
+
+            <div class="form-group hidden" id="iconGroup">
+                <label for="icon">Little picture beside it</label>
+                <select id="icon">
+                    <option value="document" selected>Document with a downward arrow, dark green &mdash; the usual one</option>
+                    <option value="sparkles">Sparkles, gold &mdash; used for the fee approval order</option>
+                    <option value="shield">Document with a downward arrow, light green &mdash; used for the cancellation policy</option>
+                </select>
+                <div class="hint">Only the Fee Structure menu draws these. Pick by the picture and colour you want &mdash; the names are just labels.</div>
+            </div>
+
+            <div class="source-box">
+                <label>Which document?</label>
+
+                <div class="radio-row">
+                    <input type="radio" id="sourceUpload" name="source" value="upload" checked>
+                    <label for="sourceUpload">
+                        <strong>Upload a new file</strong>
+                        <div class="hint">A PDF, image or Word file from this computer.</div>
+                    </label>
+                </div>
+
+                <div class="radio-row">
+                    <input type="radio" id="sourceLibrary" name="source" value="library" <%= documents.length === 0 ? 'disabled' : '' %>>
+                    <label for="sourceLibrary">
+                        <strong>Use a document that is already on the website</strong>
+                        <div class="hint">
+                            <% if (documents.length === 0) { %>
+                                Nothing has been uploaded yet, so there is nothing to reuse.
+                            <% } else { %>
+                                Shows the same file in this new place as well. Replace it once later and both
+                                places change together &mdash; this is how the fee structure stays the same
+                                everywhere.
+                            <% } %>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="radio-row" style="margin-bottom:0;">
+                    <input type="radio" id="sourceLink" name="source" value="link">
+                    <label for="sourceLink">
+                        <strong>Link to a web page instead of a file</strong>
+                        <div class="hint">Opens a website in a new tab. This is what the inspection video row does.</div>
+                    </label>
+                </div>
+
+                <div class="source-panel" id="uploadPanel">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="document">Choose the file</label>
+                        <input type="file" id="document" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx">
+                        <div class="file-chosen" id="fileChosen"></div>
+                        <div class="hint">
+                            PDF, image or Word file, up to 20 MB. It uploads when you save &mdash; there is no
+                            address to copy anywhere.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="source-panel hidden" id="libraryPanel">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="document_id">Which one?</label>
+                        <select id="document_id">
+                            <option value="">Choose a document...</option>
+                            <% documents.forEach((doc) => { %>
+                                <option value="<%= doc.id %>"
+                                        data-kind="<%= doc.kind %>"
+                                        data-places="<%= JSON.stringify(doc.places || []) %>">
+                                    <%= doc.name %> &mdash; <% if (doc.kind === 'link') { %><%= doc.file_url %><% } else { %><%= fileName(doc.file_url) %><% } %>
+                                </option>
+                            <% }); %>
+                        </select>
+                        <div class="hint">Nothing is uploaded. The new spot points at this same file.</div>
+                        <div class="reuse-note hidden" id="reuseNote"></div>
+                    </div>
+                </div>
+
+                <div class="source-panel hidden" id="linkPanel">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="file_url">Web address</label>
+                        <input type="url" id="file_url" placeholder="https://youtu.be/...">
+                        <div class="hint">The page that opens when a visitor clicks. Start it with https://</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" id="nameGroup">
+                <label for="name">Short name for your own list</label>
+                <input type="text" id="name" placeholder="e.g. Fee Structure 2026-27" maxlength="255">
+                <div class="hint">
+                    How this file is listed for you when you want to show it somewhere else as well. Visitors
+                    never see it. Leave it empty and the wording above is used.
+                </div>
+            </div>
+
+            <details class="advanced" id="advancedBox">
+                <summary>Link wording and numbering</summary>
+                <div class="advanced-body">
+                    <div class="form-group" id="linkLabelGroup">
+                        <label for="link_label">Wording of the link</label>
+                        <input type="text" id="link_label" value="Click to Download">
+                        <div class="hint">
+                            What the blue link text says. Leave it as it is to match every other row.
+                        </div>
+                    </div>
+
+                    <div class="form-group checkbox-row" style="margin-bottom:0;">
+                        <input type="checkbox" id="is_numbered" checked>
+                        <label for="is_numbered">Give this row an SL number in the main table</label>
+                    </div>
+                    <div class="hint">
+                        Unticked, the row sits in the small table underneath without a number &mdash; that is
+                        where the inspection video link lives.
+                    </div>
+                </div>
+            </details>
+
+            <button type="submit" class="btn-submit" id="submitBtn">Add it to the website</button>
+        </form>
+
+        <a href="/admin/documents" class="back-link">&larr; Back to Documents</a>
+    </div>
+
+    <script>
+        const $ = (id) => document.getElementById(id);
+        const form = $('documentForm');
+        const submitBtn = $('submitBtn');
+        const successBox = $('successBox');
+        const errorBox = $('errorBox');
+
+        const showError = (message) => {
+            successBox.className = 'alert alert-success';
+            errorBox.className = 'alert alert-error show';
+            errorBox.textContent = message;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // nginx refuses an upload over 20MB with its own HTML error page, which response.json()
+        // would surface as a syntax error nobody can act on.
+        const readJson = async (response) => {
+            try {
+                return await response.json();
+            } catch (error) {
+                if (response.status === 413) {
+                    throw new Error('That file is too large for the server. Keep it under 20 MB.');
+                }
+                throw new Error(`The server gave an unexpected reply (HTTP ${response.status}).`);
+            }
+        };
+
+        const source = () => document.querySelector('input[name="source"]:checked').value;
+        const chosenLocation = () => $('location').options[$('location').selectedIndex];
+
+        // Each spot on the website offers different things: only the Fee Structure menu draws a
+        // subtitle and an icon, and only the disclosure tables have "Click to Download" wording
+        // and SL numbers. Showing fields that spot ignores is how a panel gets confusing.
+        const applyLocation = () => {
+            const option = chosenLocation();
+            const wantsSublabel = option.dataset.sublabel === 'yes';
+            const wantsLinkLabel = option.dataset.linklabel === 'yes';
+
+            $('sublabelGroup').classList.toggle('hidden', !wantsSublabel);
+            $('iconGroup').classList.toggle('hidden', !wantsSublabel);
+            $('advancedBox').classList.toggle('hidden', !wantsLinkLabel);
+
+            if (wantsLinkLabel && source() !== 'link') {
+                $('link_label').value = option.dataset.defaultlinklabel || 'Click to Download';
+            }
+            $('is_numbered').checked = option.dataset.defaultnumbered === 'yes';
+
+            // Built out of nodes rather than a string of markup, so nothing on this page ever
+            // writes text in as HTML.
+            const note = $('whereNote');
+            note.textContent = option.dataset.blurb + ' ';
+
+            const link = document.createElement('a');
+            link.href = option.dataset.url;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.textContent = 'Open ' + option.dataset.urltext + ' \u2197';
+            note.appendChild(link);
+        };
+
+        const applySource = () => {
+            const value = source();
+            $('uploadPanel').classList.toggle('hidden', value !== 'upload');
+            $('libraryPanel').classList.toggle('hidden', value !== 'library');
+            $('linkPanel').classList.toggle('hidden', value !== 'link');
+
+            // A document already in the list keeps the name it was given; only a brand new file
+            // needs one.
+            $('nameGroup').classList.toggle('hidden', value === 'library');
+
+            if (chosenLocation().dataset.linklabel === 'yes') {
+                $('link_label').value = value === 'link' ? 'Click to View' : 'Click to Download';
+            }
+            if (value === 'link') {
+                // A web link is the unnumbered kind by default, the way the inspection video row
+                // is. Still a tick box, so a numbered one stays possible.
+                $('is_numbered').checked = false;
+            }
+        };
+
+        // Choosing a document that is already published is the moment to say what else it feeds,
+        // because from then on those places move together.
+        const applyLibraryChoice = () => {
+            const option = $('document_id').options[$('document_id').selectedIndex];
+            const note = $('reuseNote');
+            let places = [];
+
+            try {
+                places = JSON.parse(option.dataset.places || '[]');
+            } catch (error) {
+                places = [];
+            }
+
+            if (!option.value || places.length === 0) {
+                note.classList.add('hidden');
+                return;
+            }
+
+            note.classList.remove('hidden');
+            note.innerHTML =
+                '<strong>This document is already on the website at:</strong><ul>' +
+                places.map((place) => '<li></li>').join('') +
+                '</ul>Adding it here means all of those and this new spot share one file. ' +
+                'Replace it once and they all change.';
+            // Written in as text, never as markup, because it is data from the database.
+            note.querySelectorAll('li').forEach((item, index) => {
+                item.textContent = places[index];
+            });
+        };
+
+        $('location').addEventListener('change', applyLocation);
+        $('document_id').addEventListener('change', applyLibraryChoice);
+        document.querySelectorAll('input[name="source"]').forEach((radio) => {
+            radio.addEventListener('change', applySource);
+        });
+
+        $('document').addEventListener('change', () => {
+            const file = $('document').files[0];
+            $('fileChosen').textContent = file ? 'Chosen: ' + file.name : '';
+        });
+
+        applyLocation();
+        applySource();
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            errorBox.className = 'alert alert-error';
+
+            const label = $('label').value.trim();
+            if (!label) return showError('Write the wording visitors will see first.');
+
+            const mode = source();
+            const location = $('location').value;
+            const supportsSublabel = chosenLocation().dataset.sublabel === 'yes';
+            const supportsLinkLabel = chosenLocation().dataset.linklabel === 'yes';
+
+            if (mode === 'upload' && !$('document').files[0]) {
+                return showError('Choose the file to upload.');
+            }
+            if (mode === 'link' && !$('file_url').value.trim()) {
+                return showError('Paste the web address this should open.');
+            }
+            if (mode === 'library' && !$('document_id').value) {
+                return showError('Choose which document to show here.');
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Adding...';
+
+            try {
+                let response;
+
+                if (mode === 'library') {
+                    // Nothing is uploaded: the existing document simply gains one more place.
+                    const payload = {
+                        document_id: Number($('document_id').value),
+                        location: location,
+                        label: label,
+                        is_numbered: $('is_numbered').checked
+                    };
+                    if (supportsSublabel) {
+                        payload.sublabel = $('sublabel').value.trim();
+                        payload.icon = $('icon').value;
+                    }
+                    if (supportsLinkLabel) {
+                        payload.link_label = $('link_label').value.trim();
+                    }
+
+                    response = await fetch('/v1/placements/add', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                        credentials: 'same-origin'
+                    });
+                } else {
+                    // The file and the wording travel together, so the document and the spot it
+                    // appears in are created by one click.
+                    const formData = new FormData();
+                    const name = $('name').value.trim() || label;
+
+                    formData.append('name', name.substring(0, 255));
+                    formData.append('kind', mode === 'link' ? 'link' : 'file');
+                    formData.append('location', location);
+                    formData.append('label', label);
+                    formData.append('is_numbered', $('is_numbered').checked ? 'true' : 'false');
+
+                    if (supportsSublabel) {
+                        formData.append('sublabel', $('sublabel').value.trim());
+                        formData.append('icon', $('icon').value);
+                    }
+                    if (supportsLinkLabel) {
+                        formData.append('link_label', $('link_label').value.trim());
+                    }
+
+                    if (mode === 'link') {
+                        formData.append('file_url', $('file_url').value.trim());
+                    } else {
+                        formData.append('document', $('document').files[0]);
+                    }
+
+                    response = await fetch('/v1/documents/add', {
+                        method: 'POST',
+                        body: formData,
+                        credentials: 'same-origin'
+                    });
+                }
+
+                const result = await readJson(response);
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'Could not add it');
+                }
+
+                successBox.className = 'alert alert-success show';
+                successBox.innerHTML =
+                    'Added. It is now the last item in that block on the website. ' +
+                    '<a href="/admin/documents">Back to the list</a> or add another below.';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                form.reset();
+                $('fileChosen').textContent = '';
+                $('reuseNote').classList.add('hidden');
+                applyLocation();
+                applySource();
+            } catch (error) {
+                console.error('Add document error:', error);
+                showError('Could not add it: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Add it to the website';
+            }
+        });
+    </script>
+</body>
+</html>

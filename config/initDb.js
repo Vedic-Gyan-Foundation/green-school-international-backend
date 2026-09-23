@@ -115,6 +115,48 @@ const initDatabase = async () => {
     await connection.query(createDisclosureDocumentsTable);
     console.log('✅ Table "disclosure_documents" created/verified');
 
+    // Create documents table — the library. One row per real document, wherever it is shown.
+    const createDocumentsTable = `
+      CREATE TABLE IF NOT EXISTS documents (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        file_url VARCHAR(500) NOT NULL,
+        kind ENUM('file','link') NOT NULL DEFAULT 'file',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_name (name)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `;
+
+    await connection.query(createDocumentsTable);
+    console.log('✅ Table "documents" created/verified');
+
+    // Create document_placements table — where each document appears on the site, and under
+    // what caption. The same document is placed more than once on purpose (the fee structure is
+    // in both Public Disclosure section C and the Fee Structure menu), which is what makes
+    // replacing its file once update every place it is shown.
+    const createDocumentPlacementsTable = `
+      CREATE TABLE IF NOT EXISTS document_placements (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        document_id INT NOT NULL,
+        location VARCHAR(40) NOT NULL,
+        label VARCHAR(500) NOT NULL,
+        sublabel VARCHAR(255) NULL,
+        icon VARCHAR(40) NULL,
+        link_label VARCHAR(100) NULL,
+        is_numbered BOOLEAN NOT NULL DEFAULT TRUE,
+        display_order INT NOT NULL DEFAULT 0,
+        is_visible BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE,
+        INDEX idx_location_order (location, display_order)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `;
+
+    await connection.query(createDocumentPlacementsTable);
+    console.log('✅ Table "document_placements" created/verified');
+
     // Insert sample data
     const checkData = await connection.query('SELECT COUNT(*) as count FROM blogs');
     const count = checkData[0][0].count;
