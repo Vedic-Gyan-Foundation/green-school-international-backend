@@ -77,6 +77,23 @@ const initDatabase = async () => {
     await connection.query(createGalleryTable);
     console.log('✅ Table "gallery" created/verified');
 
+    // Create videos table
+    const createVideosTable = `
+      CREATE TABLE IF NOT EXISTS videos (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        url VARCHAR(500) NOT NULL,
+        title VARCHAR(500) NOT NULL,
+        published_at DATE NULL,
+        is_visible BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_published_at (published_at)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `;
+
+    await connection.query(createVideosTable);
+    console.log('✅ Table "videos" created/verified');
+
     // Insert sample data
     const checkData = await connection.query('SELECT COUNT(*) as count FROM blogs');
     const count = checkData[0][0].count;

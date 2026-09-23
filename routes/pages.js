@@ -26,6 +26,13 @@ pageRouter.get('/admin/gallery', GalleryController.renderGalleryViewer);
 const BlogController = require('../controllers/blogController');
 pageRouter.get('/admin/blogs', BlogController.renderBlogAdmin);
 
+pageRouter.get('/admin/videos/add', (req, res) => {
+  res.render('addVideoItem.ejs', { success: req.query.success === 'true' });
+});
+
+const VideoController = require('../controllers/videoController');
+pageRouter.get('/admin/videos', VideoController.renderVideoAdmin);
+
 pageRouter.get('/admin', (req, res) => {
   res.render('adminDashboard.ejs');
 });

@@ -9,6 +9,7 @@ const pageRoutes = require('./routes/pages');
 const blogRoutes = require('./routes/blogRoutes');
 const admissionRoutes = require('./routes/admissionRoutes');
 const galleryRoutes = require('./routes/galleryRoutes');
+const videoRoutes = require('./routes/videoRoutes');
 const { testConnection } = require('./config/database');
 
 const app = express();
@@ -27,6 +28,7 @@ app.use('/', pageRoutes);
 app.use('/v1', blogRoutes);
 app.use('/v1', admissionRoutes);
 app.use('/v1', galleryRoutes);
+app.use('/v1', videoRoutes);
 
 app.get('/apiv1', (req, res) => {
   res.json({

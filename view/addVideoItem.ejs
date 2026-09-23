@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Video - The Green School International</title>
+    <style>
+        :root {
+            --primary-color: #3d405b;
+            --secondary-color: #81b29a;
+            --accent-color: #f2cc8f;
+            --bg-color: #f4f1de;
+            --text-color: #3d405b;
+            --danger-color: #e07a5f;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 700px;
+            margin-top: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="url"],
+        input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .helper-text {
+            margin-top: 6px;
+            font-size: 13px;
+            color: #777;
+            line-height: 1.5;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+            cursor: pointer;
+        }
+
+        button, .btn {
+            padding: 12px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover, .btn:hover {
+            background-color: #2a2c3e;
+        }
+
+        button:disabled {
+            background-color: #9a9cb0;
+            cursor: not-allowed;
+        }
+
+        .btn-submit {
+            width: 100%;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Add Video</h1>
+
+        <% if (locals.success) { %>
+            <div class="alert alert-success">
+                Video added successfully!
+            </div>
+        <% } %>
+
+        <div class="alert alert-success" id="successAlert" style="display:none;"></div>
+        <div class="alert alert-error" id="errorAlert" style="display:none;"></div>
+
+        <form id="videoForm">
+            <div class="form-group">
+                <label for="url">Video Link</label>
+                <input type="url" id="url" name="url" placeholder="https://www.youtube.com/watch?v=xxxxxxxxxxx" required>
+                <div class="helper-text">Paste the full YouTube link for the video. Videos are links only &mdash; nothing is uploaded to the server.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="title">Display Title</label>
+                <input type="text" id="title" name="title" placeholder="Annual Day Celebration 2026" required>
+                <div class="helper-text">This is the title shown with the video on the website.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="published_at">Published Date (optional)</label>
+                <input type="date" id="published_at" name="published_at">
+                <div class="helper-text">Controls the order videos appear in &mdash; newest first. Leaving this blank sends the video to the end of the list.</div>
+            </div>
+
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="is_visible" name="is_visible" checked>
+                <label for="is_visible">Visible on the website</label>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">Add Video</button>
+        </form>
+
+        <a href="/admin/videos" class="back-link">&larr; Back to Videos</a>
+    </div>
+
+    <script>
+        const videoForm = document.getElementById('videoForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const successAlert = document.getElementById('successAlert');
+        const errorAlert = document.getElementById('errorAlert');
+
+        function showSuccess(message) {
+            errorAlert.style.display = 'none';
+            successAlert.textContent = message;
+            successAlert.style.display = 'block';
+        }
+
+        function showError(message) {
+            successAlert.style.display = 'none';
+            errorAlert.textContent = message;
+            errorAlert.style.display = 'block';
+        }
+
+        videoForm.onsubmit = async (e) => {
+            e.preventDefault();
+
+            const url = document.getElementById('url').value.trim();
+            const title = document.getElementById('title').value.trim();
+            const published_at = document.getElementById('published_at').value;
+            const is_visible = document.getElementById('is_visible').checked;
+
+            if (!url || !title) {
+                showError('Video link and display title are both required.');
+                return;
+            }
+
+            const payload = { url, title, is_visible };
+            if (published_at) payload.published_at = published_at;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Adding...';
+
+            try {
+                const response = await fetch('/v1/video/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showSuccess('Video added successfully!');
+                    videoForm.reset();
+                    document.getElementById('is_visible').checked = true;
+                } else {
+                    showError('Could not add video: ' + (result.message || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('An error occurred while adding the video.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Add Video';
+            }
+        };
+    </script>
+</body>
+</html>

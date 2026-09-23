@@ -41,5 +41,16 @@ CREATE TABLE IF NOT EXISTS gallery (
   INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS videos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  url VARCHAR(500) NOT NULL,
+  title VARCHAR(500) NOT NULL,
+  published_at DATE NULL,
+  is_visible BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_published_at (published_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Migration: Add sub_caption column if table already exists
 -- ALTER TABLE gallery ADD COLUMN sub_caption VARCHAR(255) AFTER caption;
