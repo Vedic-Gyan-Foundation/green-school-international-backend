@@ -171,6 +171,43 @@
             margin-top: 10px;
             font-size: 14px;
         }
+
+        .items-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #3d405b;
+        }
+
+        .preview-item .thumb {
+            width: 90px;
+            height: 68px;
+            flex-shrink: 0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .preview-item .thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .preview-item .thumb.placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed #c9c7bb;
+            background: #f1efe6;
+            color: #9a998c;
+            font-size: 12px;
+        }
+
+        .btn-submit:disabled {
+            background-color: #c5cfc9;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -187,15 +224,28 @@
             <div class="form-group">
                 <label for="gallery_image">Select Image(s)</label>
                 <input type="file" id="gallery_image" name="gallery_image" accept="image/*" multiple required>
-                <div class="file-count" id="fileCount"></div>
+                <div class="file-count" id="fileCount">No image selected yet</div>
             </div>
 
-            <div id="preview-area"></div>
+            <label class="items-label">Title &amp; Caption</label>
+            <div id="preview-area">
+                <!-- The first row is always present so the file picker and the title sit on
+                     screen together. Selecting more than one image adds a row per extra file. -->
+                <div class="preview-item" data-index="0">
+                    <div class="thumb placeholder" data-thumb>
+                        <span>No image</span>
+                    </div>
+                    <div class="fields">
+                        <input type="text" name="caption" placeholder="Title / caption for this image" required>
+                        <input type="text" name="sub_caption" placeholder="Sub-caption (optional)">
+                    </div>
+                </div>
+            </div>
 
-            <button type="submit" class="btn-submit" id="submitBtn" style="display:none;">Upload & Create</button>
+            <button type="submit" class="btn-submit" id="submitBtn" disabled>Upload &amp; Create</button>
         </form>
 
-        <a href="/admin/gallery" class="back-link">← Back to Gallery</a>
+        <a href="/admin/gallery" class="back-link">&larr; Back to Gallery</a>
     </div>
 
     <script>
@@ -204,58 +254,90 @@
         const submitBtn = document.getElementById('submitBtn');
         const fileCount = document.getElementById('fileCount');
 
-        fileInput.addEventListener('change', function () {
-            previewArea.innerHTML = '';
-            const files = Array.from(this.files);
+        const rowTemplate = (index) => `
+            <div class="preview-item" data-index="${index}">
+                <div class="thumb placeholder" data-thumb><span>No image</span></div>
+                <div class="fields">
+                    <input type="text" name="caption" placeholder="Title / caption for this image" required>
+                    <input type="text" name="sub_caption" placeholder="Sub-caption (optional)">
+                </div>
+                <button type="button" class="remove-btn" title="Remove" onclick="removeFile(${index})">&times;</button>
+            </div>`;
 
-            if (files.length === 0) {
-                submitBtn.style.display = 'none';
-                fileCount.textContent = '';
-                return;
-            }
+        // Keep whatever has already been typed, so choosing a file never wipes a caption.
+        const readTyped = () =>
+            Array.from(previewArea.querySelectorAll('.preview-item')).map((row) => ({
+                caption: row.querySelector('input[name="caption"]').value,
+                sub_caption: row.querySelector('input[name="sub_caption"]').value
+            }));
 
-            fileCount.textContent = files.length + ' image(s) selected';
-            submitBtn.style.display = 'block';
+        const render = () => {
+            const files = Array.from(fileInput.files);
+            const typed = readTyped();
+            const rows = Math.max(files.length, 1);
 
-            files.forEach((file, index) => {
+            previewArea.innerHTML = Array.from({ length: rows }, (_, i) => rowTemplate(i)).join('');
+
+            previewArea.querySelectorAll('.preview-item').forEach((row, i) => {
+                if (typed[i]) {
+                    row.querySelector('input[name="caption"]').value = typed[i].caption || '';
+                    row.querySelector('input[name="sub_caption"]').value = typed[i].sub_caption || '';
+                }
+                // The remove button only makes sense once there is a file behind the row.
+                const remove = row.querySelector('.remove-btn');
+                if (remove && !files[i]) remove.remove();
+            });
+
+            files.forEach((file, i) => {
                 const reader = new FileReader();
-                reader.onload = function (e) {
-                    const div = document.createElement('div');
-                    div.className = 'preview-item';
-                    div.innerHTML = `
-                        <img src="${e.target.result}" alt="Preview">
-                        <div class="fields">
-                            <input type="text" name="caption" placeholder="Caption for this image" required>
-                            <input type="text" name="sub_caption" placeholder="Sub-caption (optional)">
-                        </div>
-                        <button type="button" class="remove-btn" title="Remove" onclick="removePreview(this, ${index})">&times;</button>
-                    `;
-                    previewArea.appendChild(div);
+                reader.onload = (e) => {
+                    const holder = previewArea.querySelector(`.preview-item[data-index="${i}"] [data-thumb]`);
+                    if (holder) {
+                        holder.classList.remove('placeholder');
+                        holder.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                    }
                 };
                 reader.readAsDataURL(file);
             });
-        });
 
-        function removePreview(btn, index) {
-            // Remove from the preview
-            btn.parentElement.remove();
+            fileCount.textContent = files.length
+                ? files.length + ' image(s) selected'
+                : 'No image selected yet';
+            submitBtn.disabled = files.length === 0;
+        };
 
-            // Rebuild the file list without the removed file
+        function removeFile(index) {
             const dt = new DataTransfer();
-            const files = Array.from(fileInput.files);
-            files.forEach((file, i) => {
+            Array.from(fileInput.files).forEach((file, i) => {
                 if (i !== index) dt.items.add(file);
             });
             fileInput.files = dt.files;
-
-            // Re-render previews to fix indices
-            fileInput.dispatchEvent(new Event('change'));
-
-            if (fileInput.files.length === 0) {
-                submitBtn.style.display = 'none';
-                fileCount.textContent = '';
-            }
+            render();
         }
+
+        fileInput.addEventListener('change', render);
+
+        // A caption is only required for rows that actually have a file behind them.
+        document.getElementById('galleryForm').addEventListener('submit', (e) => {
+            const files = Array.from(fileInput.files);
+            if (files.length === 0) {
+                e.preventDefault();
+                fileCount.textContent = 'Choose at least one image first.';
+                return;
+            }
+            const missing = Array.from(previewArea.querySelectorAll('.preview-item'))
+                .slice(0, files.length)
+                .some((row) => !row.querySelector('input[name="caption"]').value.trim());
+            if (missing) {
+                e.preventDefault();
+                alert('Give every selected image a title/caption.');
+                return;
+            }
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Uploading...';
+        });
+
+        render();
     </script>
 </body>
 </html>

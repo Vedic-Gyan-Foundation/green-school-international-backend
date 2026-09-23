@@ -200,7 +200,9 @@ class GalleryController {
 
       // If it's a browser request (EJS), redirect
       if (req.headers.accept && req.headers.accept.includes('text/html')) {
-        return res.redirect('/admin/gallery?success=true');
+        // /admin/gallery/add is the page that reads `success`; /admin/gallery ignored it,
+        // so the confirmation banner never appeared. Returning here also lets you add another batch.
+        return res.redirect('/admin/gallery/add?success=true');
       }
 
       // Fetch all newly created items for API response
