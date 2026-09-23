@@ -163,6 +163,65 @@
         .empty-state h3 {
             color: var(--primary-color);
         }
+
+        /* ---- edit dialog ---- */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(61, 64, 91, 0.45);
+            z-index: 50;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 40px 20px;
+            overflow-y: auto;
+        }
+        .modal-backdrop.show { display: flex; }
+        .modal {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+            width: 100%;
+            max-width: 520px;
+            padding: 28px 30px;
+        }
+        .modal h2 { margin: 0 0 20px; color: var(--primary-color); font-size: 20px; }
+        .modal label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: var(--primary-color);
+        }
+        .modal .field { margin-bottom: 18px; }
+        .modal input[type="text"],
+        .modal input[type="url"],
+        .modal input[type="date"] {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px 12px;
+            border: 1px solid #d9d7cc;
+            border-radius: 6px;
+            font-size: 15px;
+            font-family: inherit;
+        }
+        .modal input:focus { outline: none; border-color: var(--secondary-color); }
+        .modal .checkbox-row { display: flex; align-items: center; gap: 9px; }
+        .modal .checkbox-row label { margin: 0; font-weight: 400; }
+        .modal .hint { font-size: 13px; color: #8a8ba0; margin-top: 5px; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+        .modal-error {
+            display: none;
+            background: #fbeae5;
+            color: #a4432a;
+            border: 1px solid var(--danger-color);
+            border-radius: 6px;
+            padding: 10px 12px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        .modal-error.show { display: block; }
+        .btn-secondary { background: #e4e2d7; color: var(--primary-color); }
     </style>
 </head>
 <body>
@@ -201,12 +260,11 @@
                                     <a class="video-url" href="<%= item.url %>" target="_blank" rel="noopener noreferrer"><%= item.url %></a>
                                 </td>
                                 <td>
+                                    <%# published_at arrives as a 'YYYY-MM-DD' string from DATE_FORMAT,
+                                        so print it directly — re-parsing it through Date() only
+                                        reintroduces the timezone shift that the SQL cast removes. %>
                                     <% if (item.published_at) { %>
-                                        <%
-                                            var d = new Date(item.published_at);
-                                            var pad = function (n) { return String(n).padStart(2, '0'); };
-                                        %>
-                                        <%= d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) %>
+                                        <%= item.published_at %>
                                     <% } else { %>
                                         <span class="muted">Not set</span>
                                     <% } %>
@@ -219,6 +277,13 @@
                                     <% } %>
                                 </td>
                                 <td class="actions-cell">
+                                    <button class="btn btn-primary btn-sm"
+                                        onclick="openEdit(<%= item.id %>)"
+                                        data-title="<%= item.title %>"
+                                        data-url="<%= item.url %>"
+                                        data-published="<%= item.published_at || '' %>"
+                                        data-visible="<%= item.is_visible ? '1' : '0' %>"
+                                        id="edit-btn-<%= item.id %>">Edit</button>
                                     <button class="btn btn-danger btn-sm" onclick="deleteItem(<%= item.id %>)">Delete</button>
                                 </td>
                             </tr>
@@ -316,6 +381,121 @@
                 alert('An error occurred while deleting.');
             }
         }
+    </script>
+
+    <div class="modal-backdrop" id="editBackdrop">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editHeading">
+            <h2 id="editHeading">Edit Video</h2>
+            <div class="modal-error" id="editError"></div>
+
+            <div class="field">
+                <label for="editTitle">Display Title</label>
+                <input type="text" id="editTitle" placeholder="Title shown on the website">
+            </div>
+
+            <div class="field">
+                <label for="editUrl">YouTube URL</label>
+                <input type="url" id="editUrl" placeholder="https://www.youtube.com/watch?v=...">
+            </div>
+
+            <div class="field">
+                <label for="editPublished">Published Date</label>
+                <input type="date" id="editPublished">
+                <div class="hint">Controls ordering &mdash; newest first. Blank sends it to the end.</div>
+            </div>
+
+            <div class="field checkbox-row">
+                <input type="checkbox" id="editVisible">
+                <label for="editVisible">Visible on the website</label>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-secondary" type="button" onclick="closeEdit()">Cancel</button>
+                <button class="btn btn-primary" type="button" id="editSaveBtn" onclick="saveEdit()">Save changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let editingId = null;
+
+        function openEdit(id) {
+            const btn = document.getElementById('edit-btn-' + id);
+            editingId = id;
+            document.getElementById('editTitle').value = btn.dataset.title || '';
+            document.getElementById('editUrl').value = btn.dataset.url || '';
+            document.getElementById('editPublished').value = btn.dataset.published || '';
+            document.getElementById('editVisible').checked = btn.dataset.visible === '1';
+            hideEditError();
+            document.getElementById('editBackdrop').classList.add('show');
+            document.getElementById('editTitle').focus();
+        }
+
+        function closeEdit() {
+            document.getElementById('editBackdrop').classList.remove('show');
+            editingId = null;
+        }
+
+        function showEditError(message) {
+            const box = document.getElementById('editError');
+            box.textContent = message;
+            box.classList.add('show');
+        }
+
+        function hideEditError() {
+            document.getElementById('editError').classList.remove('show');
+        }
+
+        async function saveEdit() {
+            if (!editingId) return;
+
+            const title = document.getElementById('editTitle').value.trim();
+            const url = document.getElementById('editUrl').value.trim();
+
+            if (!title) return showEditError('Title cannot be empty.');
+            if (!url) return showEditError('URL cannot be empty.');
+
+            const payload = {
+                title,
+                url,
+                published_at: document.getElementById('editPublished').value || null,
+                is_visible: document.getElementById('editVisible').checked
+            };
+
+            const saveBtn = document.getElementById('editSaveBtn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+            hideEditError();
+
+            try {
+                const response = await fetch(`/v1/video/update/${editingId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'Update failed');
+                }
+
+                // Reload so ordering reflects any change to the published date.
+                location.reload();
+            } catch (error) {
+                console.error('Error:', error);
+                showEditError('Could not save: ' + error.message);
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save changes';
+            }
+        }
+
+        document.getElementById('editBackdrop').addEventListener('click', (e) => {
+            if (e.target.id === 'editBackdrop') closeEdit();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeEdit();
+        });
     </script>
 </body>
 </html>
