@@ -26,7 +26,8 @@ class Blog {
     const offset = (page - 1) * limit;
 
     const query = `
-      SELECT id, title, cover_image, author, read_time, 
+      SELECT id, title, cover_image, author,
+             IF(read_time IS NULL OR read_time = 0, NULL, CONCAT(read_time, ' min')) AS read_time,
              SUBSTRING(content, 1, 200) as excerpt,
              created_at, updated_at
       FROM blogs
@@ -54,7 +55,10 @@ class Blog {
   // Get blog by ID
   static async getById(id) {
     const query = `
-      SELECT * FROM blogs WHERE id = ?
+      SELECT id, title, cover_image, author,
+             IF(read_time IS NULL OR read_time = 0, NULL, CONCAT(read_time, ' min')) AS read_time,
+             content, created_at, updated_at
+      FROM blogs WHERE id = ?
     `;
 
     const [rows] = await promisePool.query(query, [id]);
@@ -125,7 +129,8 @@ class Blog {
     const offset = (page - 1) * limit;
 
     const query = `
-      SELECT id, title, cover_image, author, read_time,
+      SELECT id, title, cover_image, author,
+             IF(read_time IS NULL OR read_time = 0, NULL, CONCAT(read_time, ' min')) AS read_time,
              SUBSTRING(content, 1, 200) as excerpt,
              created_at, updated_at
       FROM blogs

@@ -12,8 +12,6 @@ class GalleryController {
   static normalizeGalleryImageUrl(image, req) {
     if (!image) return '';
 
-    
-
     const protocol = req.secure || req.protocol === 'https' ? 'https' : 'http';
     const host = req.get('host');
     const currentBase = `${protocol}://${host}`;

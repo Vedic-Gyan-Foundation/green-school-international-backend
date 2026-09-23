@@ -3,6 +3,16 @@ const fs = require('fs');
 const path = require('path');
 
 class BlogController {
+  // read_time is stored as a plain integer number of minutes; the API re-attaches ' min'
+  // when reading. Blank, zero or anything non-numeric means "no read time", which the
+  // website then omits entirely rather than inventing a default.
+  static normalizeReadTime(value) {
+    if (value === undefined || value === null || value === '') return null;
+    const minutes = parseInt(value, 10);
+    if (Number.isNaN(minutes) || minutes <= 0) return null;
+    return minutes;
+  }
+
   // Create a new blog
   static async createBlog(req, res) {
     try {
@@ -20,7 +30,7 @@ class BlogController {
         title,
         cover_image,
         author,
-        read_time: read_time || '5 min read',
+        read_time: BlogController.normalizeReadTime(read_time),
         content
       };
 
@@ -119,7 +129,7 @@ class BlogController {
       // read_time is optional and falls back to '5 min read' on create, so an empty string
       // has to be allowed through here — a truthiness check made it impossible to clear.
       if (read_time !== undefined) {
-        updateData.read_time = read_time === '' ? null : read_time;
+        updateData.read_time = BlogController.normalizeReadTime(read_time);
       }
 
       // cover_image was previously never read from the body, so editing the cover image
@@ -254,6 +264,26 @@ class BlogController {
 
     const url = `${process.env.APP_URI}/blogs/${req.file.filename}`;
     res.status(200).json({ success: true, url });
+  }
+
+  // Renders the standalone edit page. The edit UI used to be a modal on the blog list,
+  // which was cramped for a full post — title, author, cover image and a rich-text body.
+  static async renderEditBlog(req, res) {
+    try {
+      const blog = await Blog.getById(req.params.id);
+      if (!blog) {
+        return res.status(404).send('Blog not found');
+      }
+
+      // getById formats read_time as '<n> min' for the website; the numeric input here
+      // needs the bare number back.
+      const readTimeMinutes = blog.read_time ? parseInt(blog.read_time, 10) : '';
+
+      res.render('editBlogPage.ejs', { blog, readTimeMinutes });
+    } catch (error) {
+      console.error('Render edit blog error:', error);
+      res.status(500).send('Internal Server Error');
+    }
   }
 
   // Bulk delete blogs

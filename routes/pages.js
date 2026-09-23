@@ -25,6 +25,7 @@ pageRouter.get('/admin/gallery', GalleryController.renderGalleryViewer);
 
 const BlogController = require('../controllers/blogController');
 pageRouter.get('/admin/blogs', BlogController.renderBlogAdmin);
+pageRouter.get('/admin/blogs/edit/:id', BlogController.renderEditBlog);
 
 pageRouter.get('/admin/videos/add', (req, res) => {
   res.render('addVideoItem.ejs', { success: req.query.success === 'true' });

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Blog Post - The Green School International</title>
+    <title>Edit Blog Post - The Green School International</title>
     <style>
         :root {
             --primary-color: #3d405b;
@@ -142,7 +142,7 @@
 <body>
     <div class="container">
         <div class="topbar">
-            <h1>Add Blog Post</h1>
+            <h1>Edit Blog Post</h1>
             <a class="back-link" href="/admin/blogs">&larr; Back to blogs</a>
         </div>
 
@@ -154,15 +154,15 @@
             <div class="form-group">
                 <label for="fileInput">Cover Image</label>
                 <div class="dropzone" id="dropzone">
-                    <strong>Choose an image</strong> or drag one here
+                    <strong>Change the cover image</strong> or drag one here
                     <p>Uploads as soon as you pick it &mdash; JPG, PNG or WebP</p>
                     <input type="file" id="fileInput" accept="image/*">
                 </div>
 
-                <div class="preview" id="preview">
-                    <img id="previewImg" alt="Cover preview">
+                <div class="preview <%= blog.cover_image ? 'show' : '' %>" id="preview">
+                    <img id="previewImg" alt="Cover preview" src="<%= blog.cover_image || '' %>">
                     <div class="preview-meta">
-                        <div class="preview-name" id="previewName"></div>
+                        <div class="preview-name" id="previewName"><%= blog.cover_image ? "Current cover image" : "" %></div>
                         <div class="preview-status" id="previewStatus"></div>
                     </div>
                     <button type="button" class="preview-remove" id="removeImage" title="Remove">&times;</button>
@@ -174,32 +174,32 @@
                     <div class="hint">Only needed to reuse an image that is already uploaded.</div>
                 </div>
 
-                <input type="hidden" id="cover_image">
+                <input type="hidden" id="cover_image" value="<%= blog.cover_image || '' %>">
             </div>
 
             <div class="form-group">
                 <label for="title">Title</label>
-                <input type="text" id="title" placeholder="Enter the blog title" required>
+                <input type="text" id="title" value="<%= blog.title %>" placeholder="Enter the blog title" required>
             </div>
 
             <div class="form-group">
                 <label for="author">Author</label>
-                <input type="text" id="author" placeholder="Enter the author's name" required>
+                <input type="text" id="author" value="<%= blog.author %>" placeholder="Enter the author's name" required>
             </div>
 
             <div class="form-group">
                 <label for="read_time">Read Time <span style="font-weight:400;color:var(--muted);font-size:13px;">(optional)</span></label>
-                <input type="number" id="read_time" min="1" step="1" placeholder="5">
+                <input type="number" id="read_time" min="1" step="1" value="<%= readTimeMinutes %>" placeholder="5">
                 <div class="hint">Just the number of minutes &mdash; &ldquo;min&rdquo; is added automatically.
                     Leave blank and the website shows no read time at all.</div>
             </div>
 
             <div class="form-group">
                 <label for="content">Content</label>
-                <textarea id="content"></textarea>
+                <textarea id="content"><%- blog.content %></textarea>
             </div>
 
-            <button type="submit" class="submit" id="submitBtn">Publish Blog Post</button>
+            <button type="submit" class="submit" id="submitBtn">Save Changes</button>
         </form>
     </div>
 
@@ -341,11 +341,11 @@
             };
 
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Publishing…';
+            submitBtn.textContent = 'Saving…';
 
             try {
-                const res = await fetch('/v1/blog/create', {
-                    method: 'POST',
+                const res = await fetch('/v1/blog/update/<%= blog.id %>', {
+                    method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
@@ -355,18 +355,13 @@
                     throw new Error(data.message || 'Blog creation failed');
                 }
 
-                showBanner('success', 'Blog post published. Add another below, or go back to the blog list.');
-                $('blogForm').reset();
-                tinymce.get('content').setContent('');
-                clearImage();
-                $('urlManual').classList.remove('show');
-                $('urlToggle').textContent = 'Use an image URL instead';
+                showBanner('success', 'Changes saved.');
             } catch (error) {
                 console.error('Blog creation failed:', error);
-                showBanner('error', 'Could not publish: ' + error.message);
+                showBanner('error', 'Could not save: ' + error.message);
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Publish Blog Post';
+                submitBtn.textContent = 'Save Changes';
             }
         });
     </script>

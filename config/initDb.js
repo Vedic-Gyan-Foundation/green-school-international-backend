@@ -29,7 +29,7 @@ const initDatabase = async () => {
         title VARCHAR(255) NOT NULL,
         cover_image VARCHAR(500),
         author VARCHAR(100) NOT NULL,
-        read_time VARCHAR(50),
+        read_time INT NULL,
         content TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
